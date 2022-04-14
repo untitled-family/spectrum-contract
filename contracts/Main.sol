@@ -17,15 +17,6 @@ contract Main is ERC721A {
     ) internal pure returns (string memory) {
         return
             string.concat(
-                svg.circle(
-                    string.concat(
-                        svg.prop("fill", "none"),
-                        svg.prop("cx", "250"),
-                        svg.prop("cy", "250"),
-                        svg.prop("r", "250")
-                    ),
-                    utils.NULL
-                ),
                 svg.foreignObject(
                     string.concat(
                         svg.prop("x", "0"),
