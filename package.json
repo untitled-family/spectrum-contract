@@ -6,7 +6,9 @@
     "test": "test"
   },
   "scripts": {
-    "test": "hardhat test"
+    "test": "hardhat test",
+    "deploy": "npx hardhat run scripts/deploy.js --network rinkeby",
+    "compile": "npx hardhat compile"
   },
   "repository": {
     "type": "git",
@@ -29,11 +31,10 @@
     "chai": "^4.2.0",
     "erc721a": "^3.2.0",
     "ethereum-waffle": "^3.1.1",
-    "ethers": "^5.0.0",
+    "ethers": "^5.6.4",
     "hardhat": "^2.3.0",
-    "husky": "^4.2.5"
+    "husky": "^4.2.5",
+    "dotenv": "^16.0.0"
   },
-  "dependencies": {
-    "@openzeppelin/contracts": "^4.5.0"
-  }
+  "dependencies": {}
 }

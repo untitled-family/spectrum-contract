@@ -1,16 +1,13 @@
 //SPDX-License-Identifier: MIT
-pragma solidity ^0.8.11;
+pragma solidity ^0.8.12;
 
-import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
-import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
+import "erc721a/contracts/ERC721A.sol";
 import "./SVG.sol";
 import "./Utils.sol";
 import "./Base64.sol";
 
-contract Main is ERC721 {
-    uint256 tokenIdsCount;
-
-    constructor() ERC721("MainTest", "TSTSTS") {}
+contract Main is ERC721A {
+    constructor() ERC721A("Main", "TSTSTS") {}
 
     function createSVG() public pure returns (string memory) {
         return
@@ -79,24 +76,71 @@ contract Main is ERC721 {
             );
     }
 
+    function getSVG64() internal pure returns (string memory) {
+        string memory stringSvg = createSVG();
+        return
+            string(
+                abi.encodePacked(
+                    "data:image/svg+xml;base64,",
+                    Base64.encode(bytes(stringSvg))
+                )
+            );
+    }
+
+    function uint2str(uint256 _i)
+        internal
+        pure
+        returns (string memory _uintAsString)
+    {
+        if (_i == 0) {
+            return "0";
+        }
+        uint256 j = _i;
+        uint256 len;
+        while (j != 0) {
+            len++;
+            j /= 10;
+        }
+        bytes memory bstr = new bytes(len);
+        uint256 k = len;
+        while (_i != 0) {
+            k = k - 1;
+            uint8 temp = (48 + uint8(_i - (_i / 10) * 10));
+            bytes1 b1 = bytes1(temp);
+            bstr[k] = b1;
+            _i /= 10;
+        }
+        return string(bstr);
+    }
+
     function tokenURI(uint256 tokenId)
         public
         pure
         override
         returns (string memory)
     {
-        return metadata(tokenId, "test", "test desc", createSVG());
+        string memory svg64 = getSVG64();
+
+        return
+            string(
+                abi.encodePacked(
+                    "data:application/json;base64,",
+                    Base64.encode(
+                        bytes(
+                            abi.encodePacked(
+                                '{"name":"',
+                                uint2str(tokenId),
+                                '", "description":"testest desc", "attributes":"", "image":"',
+                                svg64,
+                                '"}'
+                            )
+                        )
+                    )
+                )
+            );
     }
 
-    function getTokenIdsCount() external view returns (uint256) {
-        return tokenIdsCount;
-    }
-
-    function mint(address recipient) public returns (uint256) {
-        tokenIdsCount + 1;
-
-        _mint(recipient, tokenIdsCount);
-
-        return tokenIdsCount;
+    function mint(uint256 quantity) external payable {
+        _safeMint(msg.sender, quantity);
     }
 }
