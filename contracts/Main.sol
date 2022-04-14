@@ -1,12 +1,12 @@
 //SPDX-License-Identifier: MIT
 pragma solidity ^0.8.11;
 
-import "erc721a/contracts/ERC721A.sol";
+import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "./SVG.sol";
 import "./Utils.sol";
 
-contract Main is ERC721A {
-    constructor() ERC721A("MainTest", "TSTSTS") {}
+contract Main is ERC721 {
+    constructor() ERC721("MainTest", "TSTSTS") {}
 
     function createSVG() public pure returns (string memory) {
         return
