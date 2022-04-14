@@ -2,10 +2,14 @@
 pragma solidity ^0.8.11;
 
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
+import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
 import "./SVG.sol";
 import "./Utils.sol";
+import "./Base64.sol";
 
 contract Main is ERC721 {
+    uint256 tokenIdsCount;
+
     constructor() ERC721("MainTest", "TSTSTS") {}
 
     function createSVG() public pure returns (string memory) {
@@ -47,12 +51,52 @@ contract Main is ERC721 {
             );
     }
 
-    function getSVG() external pure returns (string memory) {
-        return createSVG();
+    function metadata(
+        uint256 tokenId,
+        string memory tokenName,
+        string memory tokenDescription,
+        string memory svgString
+    ) internal pure returns (string memory) {
+        string memory json = string(
+            abi.encodePacked(
+                '{"name":"',
+                tokenName,
+                "_",
+                tokenId,
+                '","description":"',
+                tokenDescription,
+                '","image": "data:image/svg+xml;base64,',
+                Base64.encode(bytes(svgString)),
+                '"}'
+            )
+        );
+        return
+            string(
+                abi.encodePacked(
+                    "data:application/json;base64,",
+                    Base64.encode(bytes(json))
+                )
+            );
     }
 
-    function mint(uint256 quantity) external payable {
-        // _safeMint's second argument now takes in a quantity, not a tokenId.
-        _safeMint(msg.sender, quantity);
+    function tokenURI(uint256 tokenId)
+        public
+        pure
+        override
+        returns (string memory)
+    {
+        return metadata(tokenId, "test", "test desc", createSVG());
+    }
+
+    function getTokenIdsCount() external view returns (uint256) {
+        return tokenIdsCount;
+    }
+
+    function mint(address recipient) public returns (uint256) {
+        tokenIdsCount + 1;
+
+        _mint(recipient, tokenIdsCount);
+
+        return tokenIdsCount;
     }
 }
