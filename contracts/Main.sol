@@ -41,13 +41,7 @@ contract Main is ERC721A {
                         svg.prop("width", "500"),
                         svg.prop("height", "500")
                     ),
-                    svg.div(
-                        string.concat(
-                            svg.prop("class", _name),
-                            svg.prop("xmlns", "http://www.w3.org/1999/xhtml")
-                        ),
-                        utils.NULL
-                    )
+                    svg.div(string.concat(svg.prop("class", _name)), utils.NULL)
                 ),
                 spectrum.styles(_name, _gradient, _duration)
             );
@@ -80,8 +74,8 @@ contract Main is ERC721A {
                     )
                 ),
                 createLayer(
-                    "layer2",
-                    "21000",
+                    "layer3",
+                    "24000",
                     spectrum.gradient(
                         "240deg",
                         "rgba(0,255,255,0.05)",
