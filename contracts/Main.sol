@@ -95,36 +95,9 @@ contract Main is ERC721A {
             );
     }
 
-    function metadata(
-        uint256 tokenId,
-        string memory tokenName,
-        string memory tokenDescription,
-        string memory svgString
-    ) internal pure returns (string memory) {
-        string memory json = string(
-            abi.encodePacked(
-                '{"name":"',
-                tokenName,
-                "_",
-                tokenId,
-                '","description":"',
-                tokenDescription,
-                '","image": "data:image/svg+xml;base64,',
-                Base64.encode(bytes(svgString)),
-                '"}'
-            )
-        );
-        return
-            string(
-                abi.encodePacked(
-                    "data:application/json;base64,",
-                    Base64.encode(bytes(json))
-                )
-            );
-    }
-
-    function getSVG64() internal pure returns (string memory) {
+    function svgToBase64() internal pure returns (string memory) {
         string memory stringSvg = createSVG();
+
         return
             string(
                 abi.encodePacked(
@@ -134,14 +107,11 @@ contract Main is ERC721A {
             );
     }
 
-    function tokenURI(uint256 tokenId)
-        public
+    function createMetadata(uint256 tokenId, string memory image)
+        internal
         pure
-        override
         returns (string memory)
     {
-        string memory svg64 = getSVG64();
-
         return
             string(
                 abi.encodePacked(
@@ -152,13 +122,24 @@ contract Main is ERC721A {
                                 '{"name":"',
                                 utils.uint2str(tokenId),
                                 '", "description":"testest desc", "attributes":"", "image":"',
-                                svg64,
+                                image,
                                 '"}'
                             )
                         )
                     )
                 )
             );
+    }
+
+    function tokenURI(uint256 tokenId)
+        public
+        pure
+        override
+        returns (string memory)
+    {
+        string memory base64svg = svgToBase64();
+
+        return createMetadata(tokenId, base64svg);
     }
 
     function mint(uint256 quantity) external payable {
