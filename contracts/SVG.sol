@@ -70,6 +70,14 @@ library svg {
         return string.concat("<![CDATA[", _content, "]]>");
     }
 
+    function div(string memory _props, string memory _children)
+        internal
+        pure
+        returns (string memory)
+    {
+        return svg.el("div", _props, _children);
+    }
+
     /* GRADIENTS */
     function radialGradient(string memory _props, string memory _children)
         internal
@@ -133,14 +141,6 @@ library svg {
         returns (string memory)
     {
         return el("foreignObject", _props, _children);
-    }
-
-    function div(string memory _props, string memory _children)
-        internal
-        pure
-        returns (string memory)
-    {
-        return el("div", _props, _children);
     }
 
     /* COMMON */

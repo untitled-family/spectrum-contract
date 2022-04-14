@@ -5,22 +5,24 @@ import "erc721a/contracts/ERC721A.sol";
 import "./SVG.sol";
 import "./Utils.sol";
 import "./Base64.sol";
+import "./SpectrumLib.sol";
 
 contract Main is ERC721A {
     constructor() ERC721A("Main", "TSTSTS") {}
 
-    function createSVG() public pure returns (string memory) {
+    function createLayer(
+        string memory _name,
+        string memory _duration,
+        string memory _gradient
+    ) internal pure returns (string memory) {
         return
             string.concat(
-                '<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100">',
                 svg.circle(
                     string.concat(
                         svg.prop("fill", "none"),
-                        svg.prop("cx", "50"),
-                        svg.prop("cy", "50"),
-                        svg.prop("r", "50"),
-                        svg.prop("width", utils.uint2str(160)),
-                        svg.prop("height", utils.uint2str(10))
+                        svg.prop("cx", "250"),
+                        svg.prop("cy", "250"),
+                        svg.prop("r", "250")
                     ),
                     utils.NULL
                 ),
@@ -28,22 +30,59 @@ contract Main is ERC721A {
                     string.concat(
                         svg.prop("x", "0"),
                         svg.prop("y", "0"),
-                        svg.prop("width", utils.uint2str(100)),
-                        svg.prop("height", utils.uint2str(100))
+                        svg.prop("width", "500"),
+                        svg.prop("height", "500")
                     ),
                     svg.div(
                         string.concat(
-                            svg.prop("class", "magenta"),
+                            svg.prop("class", _name),
                             svg.prop("xmlns", "http://www.w3.org/1999/xhtml")
                         ),
                         utils.NULL
                     )
                 ),
-                "<style>",
-                "   div { position: absolute; top: 0; left: 0; width: 100px; height: 100px; border-radius: 50%; mix-blend-mode: multiple; }",
-                "   .magenta { animation: spin 2s infinite linear; background-image: conic-gradient(from 0deg, rgba(255,000,255,0.05) 0%, rgba(255,000,255,0.9) 25%, rgba(255,000,255,0.05) 50%, rgba(255,000,255,0.05) 100%); }",
-                "   @keyframes spin { from { transform: rotate(0deg) } to { transform: rotate(360deg) } }",
-                "</style>",
+                spectrum.styles(_name, _gradient, _duration)
+            );
+    }
+
+    function createSVG() public pure returns (string memory) {
+        return
+            string.concat(
+                '<svg xmlns="http://www.w3.org/2000/svg" width="500" height="500">',
+                createLayer(
+                    "layer1",
+                    "20000",
+                    spectrum.gradient(
+                        "0deg",
+                        "rgba(255,000,255,0.05)",
+                        "rgba(255,000,255,0.9)",
+                        "rgba(255,000,255,0.05)",
+                        "rgba(255,000,255,0.05)"
+                    )
+                ),
+                createLayer(
+                    "layer2",
+                    "22000",
+                    spectrum.gradient(
+                        "120deg",
+                        "rgba(255,255,0,0.05)",
+                        "rgba(255,255,0,0.9)",
+                        "rgba(255,255,0,0.05)",
+                        "rgba(255,255,0,0.05)"
+                    )
+                ),
+                createLayer(
+                    "layer2",
+                    "21000",
+                    spectrum.gradient(
+                        "240deg",
+                        "rgba(0,255,255,0.05)",
+                        "rgba(0,255,255,0.9)",
+                        "rgba(0,255,255,0.05)",
+                        "rgba(0,255,255,0.05)"
+                    )
+                ),
+                spectrum.globalStyles(),
                 "</svg>"
             );
     }
@@ -87,32 +126,6 @@ contract Main is ERC721A {
             );
     }
 
-    function uint2str(uint256 _i)
-        internal
-        pure
-        returns (string memory _uintAsString)
-    {
-        if (_i == 0) {
-            return "0";
-        }
-        uint256 j = _i;
-        uint256 len;
-        while (j != 0) {
-            len++;
-            j /= 10;
-        }
-        bytes memory bstr = new bytes(len);
-        uint256 k = len;
-        while (_i != 0) {
-            k = k - 1;
-            uint8 temp = (48 + uint8(_i - (_i / 10) * 10));
-            bytes1 b1 = bytes1(temp);
-            bstr[k] = b1;
-            _i /= 10;
-        }
-        return string(bstr);
-    }
-
     function tokenURI(uint256 tokenId)
         public
         pure
@@ -129,7 +142,7 @@ contract Main is ERC721A {
                         bytes(
                             abi.encodePacked(
                                 '{"name":"',
-                                uint2str(tokenId),
+                                utils.uint2str(tokenId),
                                 '", "description":"testest desc", "attributes":"", "image":"',
                                 svg64,
                                 '"}'
