@@ -41,7 +41,16 @@ contract Main is ERC721A {
                         svg.prop("width", "500"),
                         svg.prop("height", "500")
                     ),
-                    svg.div(string.concat(svg.prop("class", _name)), utils.NULL)
+                    svg.div(
+                        string.concat(
+                            svg.prop(
+                                "class",
+                                string.concat(_name, " spectrum")
+                            ),
+                            svg.prop("xmlns", "http://www.w3.org/1999/xhtml")
+                        ),
+                        utils.NULL
+                    )
                 ),
                 spectrum.styles(_name, _gradient, _duration)
             );

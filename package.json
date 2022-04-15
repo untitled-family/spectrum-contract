@@ -8,6 +8,7 @@
   "scripts": {
     "test": "hardhat test",
     "deploy": "npx hardhat run scripts/deploy.js --network rinkeby",
+    "deploy-polygon": "npx hardhat run scripts/deploy.js --network matic",
     "compile": "npx hardhat compile"
   },
   "repository": {
