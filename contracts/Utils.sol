@@ -50,9 +50,8 @@ library utils {
         uint256 _b,
         uint256 _a
     ) internal pure returns (string memory) {
-        string memory formattedA = _a < 100
-            ? string.concat("0.", utils.uint2str(_a))
-            : "1";
+        string memory formattedA = utils.uint2str(_a / 10);
+
         return
             string.concat(
                 "rgba(",

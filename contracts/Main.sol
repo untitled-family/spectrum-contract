@@ -25,8 +25,10 @@ import "./Base64.sol";
 import "./SpectrumLib.sol";
 
 contract Main is ERC721A {
-    uint256 MIN_LAYERS = 1;
-    uint256 MAX_LAYERS = 5;
+    uint256 MIN_LAYERS = 2;
+    uint256 MAX_LAYERS = 10;
+    uint256 MIN_DURATION = 15000;
+    uint256 MAX_DURATION = 30000;
 
     constructor() ERC721A("Main", "TSTSTS") {}
 
@@ -59,28 +61,61 @@ contract Main is ERC721A {
             );
     }
 
-    function getLayers() private view returns (string memory) {
+    function getLayers(string memory seed)
+        private
+        view
+        returns (string memory)
+    {
         uint256 i;
         uint256 iterations = utils.getRandomInteger(
-            "name",
-            "seed",
+            "iterations",
+            seed,
             MIN_LAYERS,
             MAX_LAYERS
         );
         string memory layers;
 
         while (i < iterations) {
+            string memory id = utils.uint2str(i);
+            uint256 duration = utils.getRandomInteger(
+                id,
+                seed,
+                MIN_DURATION,
+                MAX_DURATION
+            );
+            uint256 r = utils.getRandomInteger(
+                string.concat("r_", id),
+                seed,
+                0,
+                255
+            );
+            uint256 g = utils.getRandomInteger(
+                string.concat("g_", id),
+                seed,
+                0,
+                255
+            );
+            uint256 b = utils.getRandomInteger(
+                string.concat("b_", id),
+                seed,
+                0,
+                255
+            );
+            string memory deg = utils.uint2str(
+                utils.getRandomInteger(string.concat("deg_", id), seed, 0, 360)
+            );
+
             layers = string.concat(
                 layers,
                 createLayer(
-                    "layer1",
-                    "20000",
+                    string.concat("layer_", id),
+                    utils.uint2str(duration),
                     spectrum.gradient(
-                        "0deg",
-                        "rgba(255,000,255,0.05)",
-                        "rgba(255,000,255,0.9)",
-                        "rgba(255,000,255,0.05)",
-                        "rgba(255,000,255,0.05)"
+                        string.concat(deg, "deg"),
+                        utils.rgba(r, g, b, 5),
+                        utils.rgba(r, g, b, 90),
+                        utils.rgba(r, g, b, 5),
+                        utils.rgba(r, g, b, 5)
                     )
                 )
             );
@@ -95,7 +130,7 @@ contract Main is ERC721A {
         return
             string.concat(
                 '<svg xmlns="http://www.w3.org/2000/svg" width="500" height="500">',
-                getLayers(),
+                getLayers("0xC784Fd3553517E4E930bfA53E0a5e1F053311bC3"),
                 spectrum.globalStyles(),
                 "</svg>"
             );
