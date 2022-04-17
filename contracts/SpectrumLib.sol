@@ -52,7 +52,7 @@ library spectrum {
         return
             string.concat(
                 "<style>",
-                "   .spectrum { position: absolute; top: 0; left: 0; width: 500px; height: 500px; border-radius: 50%; mix-blend-mode: multiple; }",
+                "   .spectrum { position: absolute; top: 0; left: 0; width: 500px; height: 500px; border-radius: 50%; mix-blend-mode: multiply; }",
                 "   @keyframes spin { from { transform: rotate(0deg) } to { transform: rotate(360deg) } }",
                 "</style>"
             );
