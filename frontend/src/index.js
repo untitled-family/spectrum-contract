@@ -6,7 +6,7 @@ const call = require('./call');
 const compile = require('./compile');
 const deploy = require('./deploy');
 
-const SOURCE = path.join(__dirname, '..', 'contracts', 'Renderer.sol');
+const SOURCE = path.join(__dirname, '../..', 'contracts', 'Main.sol');
 
 async function main() {
   const { vm, pk } = await boot();
@@ -14,8 +14,8 @@ async function main() {
   async function handler() {
     const { abi, bytecode } = compile(SOURCE);
     const address = await deploy(vm, pk, bytecode);
-    const stringSVG = await call(vm, address, abi, 'stringSVG');
-    const base64SVG = await call(vm, address, abi, 'base64SVG')
+    const stringSVG = await call(vm, address, abi, 'createSVG');
+    const base64SVG = await call(vm, address, abi, 'svgToBase64');
     
     return {
       stringSVG, base64SVG

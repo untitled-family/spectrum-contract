@@ -98,7 +98,10 @@ contract Main is ERC721A {
             );
     }
 
-    function svgToBase64() internal pure returns (string memory) {
+    /*
+     * TODO: Make this function `internal` instead of public
+     */
+    function svgToBase64() public pure returns (string memory) {
         string memory stringSvg = createSVG();
 
         return
@@ -134,15 +137,13 @@ contract Main is ERC721A {
             );
     }
 
-    function tokenURI(uint256 tokenId)
-        public
-        pure
-        override
-        returns (string memory)
-    {
+    /*
+     * TODO: This should have tokenId as argument
+     */
+    function _tokenURI() public pure returns (string memory) {
         string memory base64svg = svgToBase64();
 
-        return createMetadata(tokenId, base64svg);
+        return createMetadata(0, base64svg);
     }
 
     function mint(uint256 quantity) external payable {

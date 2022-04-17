@@ -7,7 +7,7 @@ const compile = require('./compile');
 const deploy = require('./deploy');
 const { DOMParser } = require('xmldom');
 
-const SOURCE = path.join(__dirname, '..', 'contracts', 'Renderer.sol');
+const SOURCE = path.join(__dirname, '../..', 'contracts', 'Main.sol');
 
 async function main() {
   const { vm, pk } = await boot();
