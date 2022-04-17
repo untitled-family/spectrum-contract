@@ -52,12 +52,15 @@ contract Main is ERC721A {
                                 "class",
                                 string.concat(_name, " spectrum")
                             ),
-                            svg.prop("xmlns", "http://www.w3.org/1999/xhtml")
+                            svg.prop("xmlns", "http://www.w3.org/1999/xhtml"),
+                            svg.prop(
+                                "style",
+                                spectrum.styles(_gradient, _duration)
+                            )
                         ),
                         utils.NULL
                     )
-                ),
-                spectrum.styles(_name, _gradient, _duration)
+                )
             );
     }
 
@@ -126,11 +129,20 @@ contract Main is ERC721A {
         return layers;
     }
 
-    function createSVG() public view returns (string memory) {
+    function getSeed() internal view returns (string memory) {
+        return
+            string.concat(
+                utils.uint2str(block.difficulty),
+                utils.uint2str(block.timestamp),
+                "0xC784Fd3553517E4E930bfA53E0a5e1F053311bC3"
+            );
+    }
+
+    function getSVG() public view returns (string memory) {
         return
             string.concat(
                 '<svg xmlns="http://www.w3.org/2000/svg" width="500" height="500">',
-                getLayers("0xC784Fd3553517E4E930bfA53E0a5e1F053311bC3"),
+                getLayers(getSeed()),
                 spectrum.globalStyles(),
                 "</svg>"
             );
@@ -140,7 +152,7 @@ contract Main is ERC721A {
      * TODO: Make this function `internal` instead of public
      */
     function svgToBase64() public view returns (string memory) {
-        string memory stringSvg = createSVG();
+        string memory stringSvg = getSVG();
 
         return
             string(
@@ -151,7 +163,7 @@ contract Main is ERC721A {
             );
     }
 
-    function createMetadata(uint256 tokenId, string memory image)
+    function getMetadata(uint256 tokenId, string memory image)
         internal
         pure
         returns (string memory)
@@ -181,9 +193,12 @@ contract Main is ERC721A {
     function _tokenURI() public view returns (string memory) {
         string memory base64svg = svgToBase64();
 
-        return createMetadata(0, base64svg);
+        return getMetadata(0, base64svg);
     }
 
+    /*
+     * TODO: This should create seed - store seed in tokenURIs[]
+     */
     function mint(uint256 quantity) external payable {
         _safeMint(msg.sender, quantity);
     }

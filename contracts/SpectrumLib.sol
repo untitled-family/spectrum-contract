@@ -28,23 +28,19 @@ library spectrum {
             );
     }
 
-    function styles(
-        string memory _name,
-        string memory _gradient,
-        string memory _duration
-    ) internal pure returns (string memory) {
+    function styles(string memory _gradient, string memory _duration)
+        internal
+        pure
+        returns (string memory)
+    {
         return
             string.concat(
-                "<style>",
-                ".",
-                _name,
-                " { animation: spin ",
+                "animation: spin ",
                 _duration,
                 "ms infinite linear;",
                 "background-image: conic-gradient(",
                 _gradient,
-                ");}",
-                "</style>"
+                ");"
             );
     }
 

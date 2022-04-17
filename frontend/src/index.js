@@ -14,7 +14,7 @@ async function main() {
   async function handler() {
     const { abi, bytecode } = compile(SOURCE);
     const address = await deploy(vm, pk, bytecode);
-    const stringSVG = await call(vm, address, abi, 'createSVG');
+    const stringSVG = await call(vm, address, abi, 'getSVG');
     const base64SVG = await call(vm, address, abi, 'svgToBase64');
     
     return {
