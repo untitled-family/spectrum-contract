@@ -25,6 +25,9 @@ import "./Base64.sol";
 import "./SpectrumLib.sol";
 
 contract Main is ERC721A {
+    uint256 MIN_LAYERS = 1;
+    uint256 MAX_LAYERS = 5;
+
     constructor() ERC721A("Main", "TSTSTS") {}
 
     function createLayer(
@@ -56,10 +59,19 @@ contract Main is ERC721A {
             );
     }
 
-    function createSVG() public pure returns (string memory) {
-        return
-            string.concat(
-                '<svg xmlns="http://www.w3.org/2000/svg" width="500" height="500">',
+    function getLayers() private view returns (string memory) {
+        uint256 i;
+        uint256 iterations = utils.getRandomInteger(
+            "name",
+            "seed",
+            MIN_LAYERS,
+            MAX_LAYERS
+        );
+        string memory layers;
+
+        while (i < iterations) {
+            layers = string.concat(
+                layers,
                 createLayer(
                     "layer1",
                     "20000",
@@ -70,29 +82,20 @@ contract Main is ERC721A {
                         "rgba(255,000,255,0.05)",
                         "rgba(255,000,255,0.05)"
                     )
-                ),
-                createLayer(
-                    "layer2",
-                    "22000",
-                    spectrum.gradient(
-                        "120deg",
-                        "rgba(255,255,0,0.05)",
-                        "rgba(255,255,0,0.9)",
-                        "rgba(255,255,0,0.05)",
-                        "rgba(255,255,0,0.05)"
-                    )
-                ),
-                createLayer(
-                    "layer3",
-                    "24000",
-                    spectrum.gradient(
-                        "240deg",
-                        "rgba(0,255,255,0.05)",
-                        "rgba(0,255,255,0.9)",
-                        "rgba(0,255,255,0.05)",
-                        "rgba(0,255,255,0.05)"
-                    )
-                ),
+                )
+            );
+
+            i++;
+        }
+
+        return layers;
+    }
+
+    function createSVG() public view returns (string memory) {
+        return
+            string.concat(
+                '<svg xmlns="http://www.w3.org/2000/svg" width="500" height="500">',
+                getLayers(),
                 spectrum.globalStyles(),
                 "</svg>"
             );
@@ -101,7 +104,7 @@ contract Main is ERC721A {
     /*
      * TODO: Make this function `internal` instead of public
      */
-    function svgToBase64() public pure returns (string memory) {
+    function svgToBase64() public view returns (string memory) {
         string memory stringSvg = createSVG();
 
         return
@@ -140,7 +143,7 @@ contract Main is ERC721A {
     /*
      * TODO: This should have tokenId as argument
      */
-    function _tokenURI() public pure returns (string memory) {
+    function _tokenURI() public view returns (string memory) {
         string memory base64svg = svgToBase64();
 
         return createMetadata(0, base64svg);

@@ -125,4 +125,17 @@ library utils {
         }
         return string(bstr);
     }
+
+    // get a random integer in a range of ints
+    function getRandomInteger(
+        string memory name,
+        string memory seed,
+        uint256 min,
+        uint256 max
+    ) internal pure returns (uint256) {
+        if (max <= min) return min;
+        return
+            (uint256(keccak256(abi.encodePacked(name, seed))) % (max - min)) +
+            min;
+    }
 }
