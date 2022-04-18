@@ -1,7 +1,7 @@
 //SPDX-License-Identifier: MIT
 pragma solidity ^0.8.12;
 
-// Title: Spectrum
+// Name: Spectrum
 // Design: biron.eth
 // Buidl: himlate.eth
 //_______________________________________________________________________________________________________________________________________
@@ -25,12 +25,12 @@ import "./Base64.sol";
 import "./SpectrumLib.sol";
 
 contract Main is ERC721A {
-    uint256 MIN_LAYERS = 3;
+    uint256 MIN_LAYERS = 1;
     uint256 MAX_LAYERS = 3;
-    uint256 MIN_DURATION = 5000;
-    uint256 MAX_DURATION = 30000;
+    uint256 MIN_DURATION = 20000;
+    uint256 MAX_DURATION = 40000;
     string TEMP_SEED =
-        "hjgjeghffffsdfs123456789fsdkjfhuhtyysdgdst1234dsf5dsf6789sdf1`1322312fhf";
+        "h1232648234sdfdfs123456789fs289374829fghf374dkjfhuhtyysdgdst1234dsf5dsf6789sdf1`1322312fhf";
 
     // 13, 17, 19, 23, 29, 31
 
@@ -89,14 +89,19 @@ contract Main is ERC721A {
             MIN_DURATION,
             MAX_DURATION
         );
-
+        string memory deg = utils.uint2str(
+            utils.getRandomInteger("deg", seed, 0, 360)
+        );
+        string memory oppDeg = utils.uint2str(
+            utils.getRandomInteger("oppDeg", seed, 0, 360)
+        );
         return
             string.concat(
                 createLayer(
                     "base",
                     utils.uint2str(duration),
                     spectrum.gradient(
-                        "0deg",
+                        string.concat(deg, "deg"),
                         string.concat(
                             utils.uint2str(shuffledArr[0]),
                             ",",
@@ -110,7 +115,7 @@ contract Main is ERC721A {
                     "base_opposite",
                     utils.uint2str(oppDuration),
                     spectrum.gradient(
-                        "180deg",
+                        string.concat(oppDeg, "deg"),
                         string.concat(
                             utils.uint2str(
                                 utils.oppositeNumber(shuffledArr[0], 255)
