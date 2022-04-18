@@ -5,25 +5,23 @@ import "./Utils.sol";
 import "./SVG.sol";
 
 library spectrum {
-    function gradient(
-        string memory _from,
-        string memory _stop1,
-        string memory _stop2,
-        string memory _stop3,
-        string memory _stop4
-    ) internal pure returns (string memory) {
+    function gradient(string memory _from, string memory _rgb)
+        internal
+        pure
+        returns (string memory)
+    {
         return
             string.concat(
                 "from ",
                 _from,
                 ", ",
-                _stop1,
+                utils.rgbaString(_rgb, "05"),
                 " 0%, ",
-                _stop2,
+                utils.rgbaString(_rgb, "9"),
                 " 25%, ",
-                _stop3,
+                utils.rgbaString(_rgb, "05"),
                 " 50%, ",
-                _stop4,
+                utils.rgbaString(_rgb, "05"),
                 " 100%"
             );
     }
@@ -48,7 +46,7 @@ library spectrum {
         return
             string.concat(
                 "<style>",
-                "   .spectrum { position: absolute; top: 0; left: 0; width: 500px; height: 500px; border-radius: 50%; mix-blend-mode: multiply; }",
+                "   .spectrum { position: absolute; top: 0; left: 0; width: 500px; height: 500px; border-radius: 50%; }",
                 "   @keyframes spin { from { transform: rotate(0deg) } to { transform: rotate(360deg) } }",
                 "</style>"
             );

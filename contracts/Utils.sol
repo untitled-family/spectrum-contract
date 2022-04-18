@@ -33,6 +33,18 @@ library utils {
         return string.concat("url(#", _id, ")");
     }
 
+    function rgbaString(string memory _rgb, string memory _a)
+        internal
+        pure
+        returns (string memory)
+    {
+        string memory formattedA = stringsEqual(_a, "100")
+            ? "1"
+            : string.concat("0.", _a);
+
+        return string.concat("rgba(", _rgb, ",", formattedA, ")");
+    }
+
     // formats generic rgba color in css
     function rgba(
         uint256 _r,
@@ -154,5 +166,13 @@ library utils {
         }
 
         return _arr;
+    }
+
+    function oppositeNumber(uint256 _a, uint256 _max)
+        internal
+        pure
+        returns (uint256)
+    {
+        return _max - _a;
     }
 }

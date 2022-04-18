@@ -25,10 +25,14 @@ import "./Base64.sol";
 import "./SpectrumLib.sol";
 
 contract Main is ERC721A {
-    uint256 MIN_LAYERS = 2;
-    uint256 MAX_LAYERS = 8;
-    uint256 MIN_DURATION = 15000;
+    uint256 MIN_LAYERS = 3;
+    uint256 MAX_LAYERS = 3;
+    uint256 MIN_DURATION = 5000;
     uint256 MAX_DURATION = 30000;
+    string TEMP_SEED =
+        "hjgjeghffffsdfs123456789fsdkjfhuhtyysdgdst1234dsf5dsf6789sdf1`1322312fhf";
+
+    // 13, 17, 19, 23, 29, 31
 
     constructor() ERC721A("Main", "TSTSTS") {}
 
@@ -41,6 +45,7 @@ contract Main is ERC721A {
             string.concat(
                 svg.foreignObject(
                     string.concat(
+                        svg.prop("style", "mix-blend-mode: multiply"),
                         svg.prop("x", "0"),
                         svg.prop("y", "0"),
                         svg.prop("width", "500"),
@@ -59,6 +64,66 @@ contract Main is ERC721A {
                             )
                         ),
                         utils.NULL
+                    )
+                )
+            );
+    }
+
+    function getBaseLayers(string memory seed)
+        private
+        view
+        returns (string memory)
+    {
+        uint256 r = utils.getRandomInteger("base", seed, 0, 255);
+        uint256[3] memory arr = [r, 255, 0];
+        uint256[3] memory shuffledArr = utils.shuffle(arr, seed);
+        uint256 duration = utils.getRandomInteger(
+            "base",
+            seed,
+            MIN_DURATION,
+            MAX_DURATION
+        );
+        uint256 oppDuration = utils.getRandomInteger(
+            "base_opposite",
+            seed,
+            MIN_DURATION,
+            MAX_DURATION
+        );
+
+        return
+            string.concat(
+                createLayer(
+                    "base",
+                    utils.uint2str(duration),
+                    spectrum.gradient(
+                        "0deg",
+                        string.concat(
+                            utils.uint2str(shuffledArr[0]),
+                            ",",
+                            utils.uint2str(shuffledArr[1]),
+                            ",",
+                            utils.uint2str(shuffledArr[2])
+                        )
+                    )
+                ),
+                createLayer(
+                    "base_opposite",
+                    utils.uint2str(oppDuration),
+                    spectrum.gradient(
+                        "180deg",
+                        string.concat(
+                            utils.uint2str(
+                                utils.oppositeNumber(shuffledArr[0], 255)
+                            ),
+                            ",",
+                            utils.uint2str(
+                                utils.oppositeNumber(shuffledArr[1], 255)
+                            ),
+                            ",",
+                            utils.uint2str(
+                                utils.oppositeNumber(shuffledArr[2], 255)
+                            )
+                        )
                     )
                 )
             );
@@ -86,7 +151,6 @@ contract Main is ERC721A {
                 MIN_DURATION,
                 MAX_DURATION
             );
-
             uint256 r = utils.getRandomInteger(
                 string.concat("r_", id),
                 seed,
@@ -109,10 +173,13 @@ contract Main is ERC721A {
                     utils.uint2str(duration),
                     spectrum.gradient(
                         string.concat(deg, "deg"),
-                        utils.rgbaFromArray(shuffledArr, "05"),
-                        utils.rgbaFromArray(shuffledArr, "9"),
-                        utils.rgbaFromArray(shuffledArr, "05"),
-                        utils.rgbaFromArray(shuffledArr, "05")
+                        string.concat(
+                            utils.uint2str(shuffledArr[0]),
+                            ",",
+                            utils.uint2str(shuffledArr[1]),
+                            ",",
+                            utils.uint2str(shuffledArr[2])
+                        )
                     )
                 )
             );
@@ -128,7 +195,7 @@ contract Main is ERC721A {
             string.concat(
                 utils.uint2str(block.difficulty),
                 utils.uint2str(block.timestamp),
-                "0x0000000x00gegrdryfgs000fsdf00x000000fdsf0x0000000x0000000x0000000x000000"
+                TEMP_SEED
             );
     }
 
@@ -137,6 +204,7 @@ contract Main is ERC721A {
             string.concat(
                 '<svg xmlns="http://www.w3.org/2000/svg" width="500" height="500">',
                 getLayers(getSeed()),
+                getBaseLayers(getSeed()),
                 spectrum.globalStyles(),
                 "</svg>"
             );
