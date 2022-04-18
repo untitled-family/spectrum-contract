@@ -26,7 +26,7 @@ import "./SpectrumLib.sol";
 
 contract Main is ERC721A {
     uint256 MIN_LAYERS = 2;
-    uint256 MAX_LAYERS = 10;
+    uint256 MAX_LAYERS = 8;
     uint256 MIN_DURATION = 15000;
     uint256 MAX_DURATION = 30000;
 
@@ -86,23 +86,17 @@ contract Main is ERC721A {
                 MIN_DURATION,
                 MAX_DURATION
             );
+
             uint256 r = utils.getRandomInteger(
                 string.concat("r_", id),
                 seed,
                 0,
                 255
             );
-            uint256 g = utils.getRandomInteger(
-                string.concat("g_", id),
-                seed,
-                0,
-                255
-            );
-            uint256 b = utils.getRandomInteger(
-                string.concat("b_", id),
-                seed,
-                0,
-                255
+            uint256[3] memory arr = [r, 0, 255];
+            uint256[3] memory shuffledArr = utils.shuffle(
+                arr,
+                utils.uint2str(i)
             );
             string memory deg = utils.uint2str(
                 utils.getRandomInteger(string.concat("deg_", id), seed, 0, 360)
@@ -115,10 +109,10 @@ contract Main is ERC721A {
                     utils.uint2str(duration),
                     spectrum.gradient(
                         string.concat(deg, "deg"),
-                        utils.rgba(r, g, b, 5),
-                        utils.rgba(r, g, b, 90),
-                        utils.rgba(r, g, b, 5),
-                        utils.rgba(r, g, b, 5)
+                        utils.rgbaFromArray(shuffledArr, "05"),
+                        utils.rgbaFromArray(shuffledArr, "9"),
+                        utils.rgbaFromArray(shuffledArr, "05"),
+                        utils.rgbaFromArray(shuffledArr, "05")
                     )
                 )
             );
@@ -134,7 +128,7 @@ contract Main is ERC721A {
             string.concat(
                 utils.uint2str(block.difficulty),
                 utils.uint2str(block.timestamp),
-                "0xC784Fd3553517E4E930bfA53E0a5e1F053311bC3"
+                "0x0000000x00gegrdryfgs000fsdf00x000000fdsf0x0000000x0000000x0000000x000000"
             );
     }
 

@@ -33,24 +33,16 @@ library utils {
         return string.concat("url(#", _id, ")");
     }
 
-    // formats rgba white with a specified opacity / alpha
-    function white_a(uint256 _a) internal pure returns (string memory) {
-        return rgba(255, 255, 255, _a);
-    }
-
-    // formats rgba black with a specified opacity / alpha
-    function black_a(uint256 _a) internal pure returns (string memory) {
-        return rgba(0, 0, 0, _a);
-    }
-
     // formats generic rgba color in css
     function rgba(
         uint256 _r,
         uint256 _g,
         uint256 _b,
-        uint256 _a
+        string memory _a
     ) internal pure returns (string memory) {
-        string memory formattedA = utils.uint2str(_a / 10);
+        string memory formattedA = stringsEqual(_a, "100")
+            ? "1"
+            : string.concat("0.", _a);
 
         return
             string.concat(
@@ -64,6 +56,14 @@ library utils {
                 formattedA,
                 ")"
             );
+    }
+
+    function rgbaFromArray(uint256[3] memory _arr, string memory _a)
+        internal
+        pure
+        returns (string memory)
+    {
+        return rgba(_arr[0], _arr[1], _arr[2], _a);
     }
 
     // checks if two strings are equal
@@ -127,14 +127,32 @@ library utils {
 
     // get a random integer in a range of ints
     function getRandomInteger(
-        string memory name,
-        string memory seed,
-        uint256 min,
-        uint256 max
+        string memory _name,
+        string memory _seed,
+        uint256 _min,
+        uint256 _max
     ) internal pure returns (uint256) {
-        if (max <= min) return min;
+        if (_max <= _min) return _min;
         return
-            (uint256(keccak256(abi.encodePacked(name, seed))) % (max - min)) +
-            min;
+            (uint256(keccak256(abi.encodePacked(_name, _seed))) %
+                (_max - _min)) + _min;
+    }
+
+    // suffle an array of uints
+    function shuffle(uint256[3] memory _arr, string memory _seed)
+        internal
+        view
+        returns (uint256[3] memory)
+    {
+        for (uint256 i = 0; i < _arr.length; i++) {
+            uint256 n = i +
+                (uint256(keccak256(abi.encodePacked(block.timestamp, _seed))) %
+                    (_arr.length - i));
+            uint256 temp = _arr[n];
+            _arr[n] = _arr[i];
+            _arr[i] = temp;
+        }
+
+        return _arr;
     }
 }
