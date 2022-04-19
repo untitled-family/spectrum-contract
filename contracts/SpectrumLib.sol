@@ -46,7 +46,7 @@ library spectrum {
         return
             string.concat(
                 "<style>",
-                "   .spectrum { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border-radius: 50%; }",
+                "   .spectrum { position: absolute; top: 0; left: 0; width: 1000px; height: 1000px; border-radius: 50%; }",
                 "   @keyframes spin { from { transform: rotate(0deg) } to { transform: rotate(360deg) } }",
                 "</style>"
             );

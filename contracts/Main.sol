@@ -211,7 +211,7 @@ contract Main is ERC721A {
         returns (string memory)
     {
         string memory stringSvg = string.concat(
-            '<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" style="position: relative;">',
+            '<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="1000">',
             _createAltLayers(_seed),
             _createBaseLayers(_seed),
             spectrum.globalStyles(),
