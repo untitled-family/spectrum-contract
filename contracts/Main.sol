@@ -21,6 +21,8 @@ pragma solidity ^0.8.12;
 import "erc721a/contracts/ERC721A.sol";
 import "./Utils.sol";
 import "./SpectrumLib.sol";
+import "./SpectrumGeneratorInterface.sol";
+import "hardhat/console.sol";
 
 // import "./SpectrumGenerator.sol";
 
@@ -31,25 +33,49 @@ contract Main is ERC721A {
     uint256 public constant PRICE = 0.025 ether;
     uint256 public tokenCounter;
 
-    mapping(uint256 => bytes32) private seeds;
+    SpectrumGeneratorInterface public spectrumGenerator;
+
+    mapping(uint256 => uint256) private seeds;
     mapping(address => uint256) private mintedAddress;
 
     // IMetavatarGenerator public generator;
 
-    constructor() ERC721A("Main", "TSTSTS") {}
+    constructor(SpectrumGeneratorInterface _spectrumGenerator)
+        ERC721A("Main", "TSTSTS")
+    {
+        spectrumGenerator = _spectrumGenerator;
+    }
 
     event onMintSuccess(address sender, uint256 tokenId);
 
-    function _createSeed(uint256 _tokenId) internal view returns (bytes32) {
+    function _createSeed(uint256 _tokenId, address _address)
+        internal
+        view
+        returns (uint256)
+    {
         return
-            keccak256(
-                abi.encodePacked(block.difficulty, block.timestamp, _tokenId)
+            uint256(
+                keccak256(
+                    abi.encodePacked(
+                        _tokenId,
+                        _address,
+                        block.difficulty,
+                        block.timestamp
+                    )
+                )
             );
     }
 
-    // function tokenURI(uint256 _tokenId) public view override returns (string memory) {
-    //     return spectrumGenerator.tokenURI(_tokenId, seeds[_tokenId]);
-    // }
+    function tokenURI(uint256 _tokenId)
+        public
+        view
+        override
+        returns (string memory)
+    {
+        console.log("_tokenId", _tokenId);
+        console.log("seeds[_tokenId]", seeds[_tokenId]);
+        return spectrumGenerator.tokenURI(_tokenId, seeds[_tokenId]);
+    }
 
     /**
      * TODO: make sure it's nonReentrant
@@ -72,7 +98,7 @@ contract Main is ERC721A {
         _safeMint(msg.sender, _q);
 
         for (uint8 i = 0; i < _q; i++) {
-            seeds[currentTokenId] = _createSeed(currentTokenId);
+            seeds[currentTokenId] = _createSeed(currentTokenId, msg.sender);
             mintedAddress[msg.sender] += _q;
 
             emit onMintSuccess(msg.sender, currentTokenId);
