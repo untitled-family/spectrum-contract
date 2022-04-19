@@ -38,7 +38,7 @@ contract Main is ERC721A {
 
     constructor() ERC721A("Main", "TSTSTS") {}
 
-    function createLayer(
+    function _createLayer(
         string memory _name,
         string memory _duration,
         string memory _gradient
@@ -71,8 +71,8 @@ contract Main is ERC721A {
             );
     }
 
-    function getBaseLayers(string memory seed)
-        private
+    function _createBaseLayers(string memory seed)
+        internal
         view
         returns (string memory)
     {
@@ -99,7 +99,7 @@ contract Main is ERC721A {
         );
         return
             string.concat(
-                createLayer(
+                _createLayer(
                     "base",
                     utils.uint2str(duration),
                     spectrum.gradient(
@@ -113,7 +113,7 @@ contract Main is ERC721A {
                         )
                     )
                 ),
-                createLayer(
+                _createLayer(
                     "base_opposite",
                     utils.uint2str(oppDuration),
                     spectrum.gradient(
@@ -136,8 +136,8 @@ contract Main is ERC721A {
             );
     }
 
-    function getLayers(string memory seed)
-        private
+    function _createAltLayers(string memory seed)
+        internal
         view
         returns (string memory)
     {
@@ -175,7 +175,7 @@ contract Main is ERC721A {
 
             layers = string.concat(
                 layers,
-                createLayer(
+                _createLayer(
                     string.concat("layer_", id),
                     utils.uint2str(duration),
                     spectrum.gradient(
@@ -197,7 +197,11 @@ contract Main is ERC721A {
         return layers;
     }
 
-    function getSeed(uint256 _tokenId) internal view returns (string memory) {
+    function _createSeed(uint256 _tokenId)
+        internal
+        view
+        returns (string memory)
+    {
         return
             string.concat(
                 utils.uint2str(block.difficulty),
@@ -206,26 +210,18 @@ contract Main is ERC721A {
             );
     }
 
-    function getSVG(string memory _seed) internal view returns (string memory) {
-        return
-            string.concat(
-                '<svg xmlns="http://www.w3.org/2000/svg" width="500" height="500">',
-                getLayers(_seed),
-                getBaseLayers(_seed),
-                spectrum.globalStyles(),
-                "</svg>"
-            );
-    }
-
-    /*
-     * TODO: Make this function `internal` instead of public
-     */
-    function getSvgBase64(string memory _seed)
+    function _createSvg(string memory _seed)
         internal
         view
         returns (string memory)
     {
-        string memory stringSvg = getSVG(_seed);
+        string memory stringSvg = string.concat(
+            '<svg xmlns="http://www.w3.org/2000/svg" width="500" height="500">',
+            _createAltLayers(_seed),
+            _createBaseLayers(_seed),
+            spectrum.globalStyles(),
+            "</svg>"
+        );
 
         return
             string(
@@ -236,7 +232,7 @@ contract Main is ERC721A {
             );
     }
 
-    function getMetadata(uint256 tokenId, string memory image)
+    function _prepareMetadata(uint256 tokenId, string memory image)
         internal
         pure
         returns (string memory)
@@ -260,10 +256,6 @@ contract Main is ERC721A {
             );
     }
 
-    /*
-     * TODO: This should have tokenId as argument
-     * get token uri
-     */
     function tokenURI(uint256 _tokenId)
         public
         view
@@ -275,7 +267,7 @@ contract Main is ERC721A {
         return _tokenURI;
     }
 
-    function setTokenURI(uint256 tokenId, string memory _tokenURI)
+    function _setTokenURI(uint256 tokenId, string memory _tokenURI)
         internal
         virtual
     {
@@ -286,26 +278,26 @@ contract Main is ERC721A {
         _tokenURIs[tokenId] = _tokenURI;
     }
 
-    function mint(uint256 _q) external payable {
+    function mint(uint256 _q) external payable returns (uint256[5] memory) {
         uint256 tokenId = tokenCounter;
-        // require(
-        //     bytes(tokenURI(tokenId)).length <= 0,
-        //     "tokenURI is already set!"
-        // );
+        uint256[5] memory mintedIds;
 
         _safeMint(msg.sender, _q);
 
         for (uint8 i = 0; i < _q; i++) {
             tokenCounter = tokenCounter + 1;
 
-            string memory seed = getSeed(tokenId);
-            string memory img = getSvgBase64(seed);
-            // setTokenURI(tokenId, );
+            string memory seed = _createSeed(tokenId);
+            string memory img = _createSvg(seed);
 
-            string memory URI = getMetadata(tokenId, img);
-            setTokenURI(tokenId, URI);
+            string memory URI = _prepareMetadata(tokenId, img);
+            _setTokenURI(tokenId, URI);
+
+            mintedIds[i] = tokenId;
 
             tokenId++;
         }
+
+        return mintedIds;
     }
 }
