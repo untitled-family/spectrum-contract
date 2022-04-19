@@ -48,8 +48,8 @@ contract Main is ERC721A {
                         svg.prop("style", "mix-blend-mode: multiply"),
                         svg.prop("x", "0"),
                         svg.prop("y", "0"),
-                        svg.prop("width", "500"),
-                        svg.prop("height", "500")
+                        svg.prop("width", "1000"),
+                        svg.prop("height", "1000")
                     ),
                     svg.div(
                         string.concat(
@@ -211,7 +211,7 @@ contract Main is ERC721A {
         returns (string memory)
     {
         string memory stringSvg = string.concat(
-            '<svg xmlns="http://www.w3.org/2000/svg" width="500" height="500">',
+            '<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" style="position: relative;">',
             _createAltLayers(_seed),
             _createBaseLayers(_seed),
             spectrum.globalStyles(),
