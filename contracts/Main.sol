@@ -1,7 +1,7 @@
 //SPDX-License-Identifier: MIT
 pragma solidity ^0.8.12;
 
-// Name: Spectrum
+// Name: Spectrum Minter
 // Design: biron.eth
 // Buidl: himlate.eth
 //_______________________________________________________________________________________________________________________________________
