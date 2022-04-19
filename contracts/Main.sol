@@ -19,9 +19,7 @@ pragma solidity ^0.8.12;
 //_______________________________________________________________________________________________________________________________________
 
 import "erc721a/contracts/ERC721A.sol";
-import "./SVG.sol";
 import "./Utils.sol";
-import "./Base64.sol";
 import "./SpectrumLib.sol";
 
 // import "./SpectrumGenerator.sol";
@@ -30,6 +28,7 @@ contract Main is ERC721A {
     uint256 public constant MAX_SPECTRUMS = 1111;
     uint256 public constant MAX_PER_ADDRESS = 30;
     uint256 public constant MAX_PER_ADDRESS_WL = 5;
+    uint256 public constant PRICE = 0.025 ether;
     uint256 public tokenCounter;
 
     mapping(uint256 => bytes32) private seeds;
@@ -67,7 +66,7 @@ contract Main is ERC721A {
             "Max 30 per wallet"
         );
         require(_q <= MAX_PER_ADDRESS, "Max 30 per wallet");
-        // require(PRICE * _q <= msg.value);
+        require(PRICE * _q <= msg.value, "Min 0.25eth per Spectrum");
         uint256 currentTokenId = tokenCounter;
 
         _safeMint(msg.sender, _q);
