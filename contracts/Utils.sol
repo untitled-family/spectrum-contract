@@ -140,7 +140,7 @@ library utils {
     // get a random integer in a range of ints
     function getRandomInteger(
         string memory _name,
-        string memory _seed,
+        uint256 _seed,
         uint256 _min,
         uint256 _max
     ) internal pure returns (uint256) {
@@ -151,7 +151,7 @@ library utils {
     }
 
     // suffle an array of uints
-    function shuffle(uint256[3] memory _arr, string memory _seed)
+    function shuffle(uint256[3] memory _arr, uint256 _seed)
         internal
         view
         returns (uint256[3] memory)

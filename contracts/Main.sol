@@ -1,7 +1,7 @@
 //SPDX-License-Identifier: MIT
 pragma solidity ^0.8.12;
 
-// Name: Spectrum
+// Name: Spectrum Minter
 // Design: biron.eth
 // Buidl: himlate.eth
 //_______________________________________________________________________________________________________________________________________
@@ -19,236 +19,48 @@ pragma solidity ^0.8.12;
 //_______________________________________________________________________________________________________________________________________
 
 import "erc721a/contracts/ERC721A.sol";
-import "./SVG.sol";
 import "./Utils.sol";
-import "./Base64.sol";
 import "./SpectrumLib.sol";
+import "./SpectrumGeneratorInterface.sol";
+import "hardhat/console.sol";
+
+// import "./SpectrumGenerator.sol";
 
 contract Main is ERC721A {
-    uint256 private MIN_LAYERS = 1;
-    uint256 private MAX_LAYERS = 3;
-    uint256 private MIN_DURATION = 20000;
-    uint256 private MAX_DURATION = 40000;
-
-    mapping(uint256 => string) private _tokenURIs;
-
+    uint256 public constant MAX_SPECTRUMS = 1111;
+    uint256 public constant MAX_PER_ADDRESS = 30;
+    uint256 public constant MAX_PER_ADDRESS_WL = 5;
+    uint256 public constant PRICE = 0.025 ether;
     uint256 public tokenCounter;
 
-    constructor() ERC721A("Main", "TSTSTS") {}
+    SpectrumGeneratorInterface public spectrumGenerator;
 
-    function _createLayer(
-        string memory _name,
-        string memory _duration,
-        string memory _gradient
-    ) internal pure returns (string memory) {
-        return
-            string.concat(
-                svg.foreignObject(
-                    string.concat(
-                        svg.prop(
-                            "style",
-                            "mix-blend-mode: multiply; transform: scale(1);"
-                        ),
-                        svg.prop("x", "0"),
-                        svg.prop("y", "0"),
-                        svg.prop("width", "1000"),
-                        svg.prop("height", "1000")
-                    ),
-                    svg.div(
-                        string.concat(
-                            svg.prop(
-                                "class",
-                                string.concat(_name, " spectrum")
-                            ),
-                            svg.prop("xmlns", "http://www.w3.org/1999/xhtml"),
-                            svg.prop(
-                                "style",
-                                spectrum.styles(_gradient, _duration)
-                            )
-                        ),
-                        utils.NULL
-                    )
-                )
-            );
+    mapping(uint256 => uint256) private seeds;
+    mapping(address => uint256) private mintedAddress;
+
+    // IMetavatarGenerator public generator;
+
+    constructor(SpectrumGeneratorInterface _spectrumGenerator)
+        ERC721A("Main", "TSTSTS")
+    {
+        spectrumGenerator = _spectrumGenerator;
     }
 
-    function _createBaseLayers(string memory seed)
+    event onMintSuccess(address sender, uint256 tokenId);
+
+    function _createSeed(uint256 _tokenId, address _address)
         internal
         view
-        returns (string memory)
-    {
-        uint256 r = utils.getRandomInteger("base", seed, 0, 255);
-        uint256[3] memory arr = [r, 255, 0];
-        uint256[3] memory shuffledArr = utils.shuffle(arr, seed);
-        uint256 duration = utils.getRandomInteger(
-            "base",
-            seed,
-            MIN_DURATION,
-            MAX_DURATION
-        );
-        uint256 oppDuration = utils.getRandomInteger(
-            "base_opposite",
-            seed,
-            MIN_DURATION,
-            MAX_DURATION
-        );
-        string memory deg = utils.uint2str(
-            utils.getRandomInteger("deg", seed, 0, 360)
-        );
-        string memory oppDeg = utils.uint2str(
-            utils.getRandomInteger("oppDeg", seed, 0, 360)
-        );
-        return
-            string.concat(
-                _createLayer(
-                    "base",
-                    utils.uint2str(duration),
-                    spectrum.gradient(
-                        string.concat(deg, "deg"),
-                        string.concat(
-                            utils.uint2str(shuffledArr[0]),
-                            ",",
-                            utils.uint2str(shuffledArr[1]),
-                            ",",
-                            utils.uint2str(shuffledArr[2])
-                        )
-                    )
-                ),
-                _createLayer(
-                    "base_opposite",
-                    utils.uint2str(oppDuration),
-                    spectrum.gradient(
-                        string.concat(oppDeg, "deg"),
-                        string.concat(
-                            utils.uint2str(
-                                utils.oppositeNumber(shuffledArr[0], 255)
-                            ),
-                            ",",
-                            utils.uint2str(
-                                utils.oppositeNumber(shuffledArr[1], 255)
-                            ),
-                            ",",
-                            utils.uint2str(
-                                utils.oppositeNumber(shuffledArr[2], 255)
-                            )
-                        )
-                    )
-                )
-            );
-    }
-
-    function _createAltLayers(string memory seed)
-        internal
-        view
-        returns (string memory)
-    {
-        uint256 iterations = utils.getRandomInteger(
-            "iterations",
-            seed,
-            MIN_LAYERS,
-            MAX_LAYERS
-        );
-        string memory layers;
-
-        for (uint8 i = 0; i < iterations; i++) {
-            string memory id = utils.uint2str(i);
-            uint256 duration = utils.getRandomInteger(
-                id,
-                seed,
-                MIN_DURATION,
-                MAX_DURATION
-            );
-            uint256 r = utils.getRandomInteger(
-                string.concat("r_", id),
-                seed,
-                0,
-                255
-            );
-            uint256[3] memory arr = [r, 0, 255];
-            uint256[3] memory shuffledArr = utils.shuffle(
-                arr,
-                utils.uint2str(i)
-            );
-            string memory deg = utils.uint2str(
-                utils.getRandomInteger(string.concat("deg_", id), seed, 0, 360)
-            );
-
-            layers = string.concat(
-                layers,
-                _createLayer(
-                    string.concat("layer_", id),
-                    utils.uint2str(duration),
-                    spectrum.gradient(
-                        string.concat(deg, "deg"),
-                        string.concat(
-                            utils.uint2str(shuffledArr[0]),
-                            ",",
-                            utils.uint2str(shuffledArr[1]),
-                            ",",
-                            utils.uint2str(shuffledArr[2])
-                        )
-                    )
-                )
-            );
-        }
-
-        return layers;
-    }
-
-    function _createSeed(uint256 _tokenId)
-        internal
-        view
-        returns (string memory)
+        returns (uint256)
     {
         return
-            string.concat(
-                utils.uint2str(block.difficulty),
-                utils.uint2str(block.timestamp),
-                utils.uint2str(_tokenId)
-            );
-    }
-
-    function _createSvg(string memory _seed)
-        internal
-        view
-        returns (string memory)
-    {
-        string memory stringSvg = string.concat(
-            '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 1000 1000">',
-            _createAltLayers(_seed),
-            _createBaseLayers(_seed),
-            spectrum.globalStyles(),
-            "</svg>"
-        );
-
-        return
-            string(
-                abi.encodePacked(
-                    "data:image/svg+xml;base64,",
-                    Base64.encode(bytes(stringSvg))
-                )
-            );
-    }
-
-    function _prepareMetadata(uint256 tokenId, string memory image)
-        internal
-        pure
-        returns (string memory)
-    {
-        return
-            string(
-                abi.encodePacked(
-                    "data:application/json;base64,",
-                    Base64.encode(
-                        bytes(
-                            abi.encodePacked(
-                                '{"name":"',
-                                utils.uint2str(tokenId),
-                                '", "description":"testest desc", "attributes":"", "image":"',
-                                image,
-                                '"}'
-                            )
-                        )
+            uint256(
+                keccak256(
+                    abi.encodePacked(
+                        _tokenId,
+                        _address,
+                        block.difficulty,
+                        block.timestamp
                     )
                 )
             );
@@ -260,42 +72,39 @@ contract Main is ERC721A {
         override
         returns (string memory)
     {
-        string memory _tokenURI = _tokenURIs[_tokenId];
-
-        return _tokenURI;
+        console.log("_tokenId", _tokenId);
+        console.log("seeds[_tokenId]", seeds[_tokenId]);
+        return spectrumGenerator.tokenURI(_tokenId, seeds[_tokenId]);
     }
 
-    function _setTokenURI(uint256 tokenId, string memory _tokenURI)
-        internal
-        virtual
-    {
+    /**
+     * TODO: make sure it's nonReentrant
+     */
+    function mint(uint256 _q) external payable {
+        require(_q > 0, "You should mint one");
+        require(tokenCounter <= MAX_SPECTRUMS, "All metavatars minted");
         require(
-            _exists(tokenId),
-            "ERC721URIStorage: URI set of nonexistent token"
+            tokenCounter + _q <= MAX_SPECTRUMS,
+            "Minting exceeds max supply"
         );
-        _tokenURIs[tokenId] = _tokenURI;
-    }
-
-    function mint(uint256 _q) external payable returns (uint256[5] memory) {
-        uint256 tokenId = tokenCounter;
-        uint256[5] memory mintedIds;
+        require(
+            mintedAddress[msg.sender] + _q <= MAX_PER_ADDRESS,
+            "Max 30 per wallet"
+        );
+        require(_q <= MAX_PER_ADDRESS, "Max 30 per wallet");
+        require(PRICE * _q <= msg.value, "Min 0.25eth per Spectrum");
+        uint256 currentTokenId = tokenCounter;
 
         _safeMint(msg.sender, _q);
 
         for (uint8 i = 0; i < _q; i++) {
-            tokenCounter = tokenCounter + 1;
+            seeds[currentTokenId] = _createSeed(currentTokenId, msg.sender);
+            mintedAddress[msg.sender] += _q;
 
-            string memory seed = _createSeed(tokenId);
-            string memory img = _createSvg(seed);
+            emit onMintSuccess(msg.sender, currentTokenId);
 
-            string memory URI = _prepareMetadata(tokenId, img);
-            _setTokenURI(tokenId, URI);
-
-            mintedIds[i] = tokenId;
-
-            tokenId++;
+            tokenCounter++;
+            currentTokenId++;
         }
-
-        return mintedIds;
     }
 }
