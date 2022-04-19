@@ -141,7 +141,6 @@ contract Main is ERC721A {
         view
         returns (string memory)
     {
-        uint256 i;
         uint256 iterations = utils.getRandomInteger(
             "iterations",
             seed,
@@ -150,7 +149,7 @@ contract Main is ERC721A {
         );
         string memory layers;
 
-        while (i < iterations) {
+        for (uint8 i = 0; i < iterations; i++) {
             string memory id = utils.uint2str(i);
             uint256 duration = utils.getRandomInteger(
                 id,
@@ -190,8 +189,6 @@ contract Main is ERC721A {
                     )
                 )
             );
-
-            i++;
         }
 
         return layers;
