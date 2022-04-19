@@ -29,8 +29,6 @@ contract Main is ERC721A {
     uint256 private MAX_LAYERS = 3;
     uint256 private MIN_DURATION = 20000;
     uint256 private MAX_DURATION = 40000;
-    string TEMP_SEED =
-        "h1232648234sdfdfs123456789fs289374829fghf374dkjfhuhtyysdgdst1234dsf5dsf6789sdf1`1322312fhf";
 
     mapping(uint256 => string) private _tokenURIs;
 
