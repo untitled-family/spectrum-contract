@@ -25,14 +25,16 @@ import "./Base64.sol";
 import "./SpectrumLib.sol";
 
 contract Main is ERC721A {
-    uint256 MIN_LAYERS = 1;
-    uint256 MAX_LAYERS = 3;
-    uint256 MIN_DURATION = 20000;
-    uint256 MAX_DURATION = 40000;
+    uint256 private MIN_LAYERS = 1;
+    uint256 private MAX_LAYERS = 3;
+    uint256 private MIN_DURATION = 20000;
+    uint256 private MAX_DURATION = 40000;
     string TEMP_SEED =
         "h1232648234sdfdfs123456789fs289374829fghf374dkjfhuhtyysdgdst1234dsf5dsf6789sdf1`1322312fhf";
 
-    // 13, 17, 19, 23, 29, 31
+    mapping(uint256 => string) private _tokenURIs;
+
+    uint256 public tokenCounter;
 
     constructor() ERC721A("Main", "TSTSTS") {}
 
@@ -195,21 +197,21 @@ contract Main is ERC721A {
         return layers;
     }
 
-    function getSeed() internal view returns (string memory) {
+    function getSeed(uint256 _tokenId) internal view returns (string memory) {
         return
             string.concat(
                 utils.uint2str(block.difficulty),
                 utils.uint2str(block.timestamp),
-                TEMP_SEED
+                utils.uint2str(_tokenId)
             );
     }
 
-    function getSVG() public view returns (string memory) {
+    function getSVG(string memory _seed) internal view returns (string memory) {
         return
             string.concat(
                 '<svg xmlns="http://www.w3.org/2000/svg" width="500" height="500">',
-                getLayers(getSeed()),
-                getBaseLayers(getSeed()),
+                getLayers(_seed),
+                getBaseLayers(_seed),
                 spectrum.globalStyles(),
                 "</svg>"
             );
@@ -218,8 +220,12 @@ contract Main is ERC721A {
     /*
      * TODO: Make this function `internal` instead of public
      */
-    function svgToBase64() public view returns (string memory) {
-        string memory stringSvg = getSVG();
+    function getSvgBase64(string memory _seed)
+        internal
+        view
+        returns (string memory)
+    {
+        string memory stringSvg = getSVG(_seed);
 
         return
             string(
@@ -256,17 +262,50 @@ contract Main is ERC721A {
 
     /*
      * TODO: This should have tokenId as argument
+     * get token uri
      */
-    function _tokenURI() public view returns (string memory) {
-        string memory base64svg = svgToBase64();
+    function tokenURI(uint256 _tokenId)
+        public
+        view
+        override
+        returns (string memory)
+    {
+        string memory _tokenURI = _tokenURIs[_tokenId];
 
-        return getMetadata(0, base64svg);
+        return _tokenURI;
     }
 
-    /*
-     * TODO: This should create seed - store seed in tokenURIs[]
-     */
-    function mint(uint256 quantity) external payable {
-        _safeMint(msg.sender, quantity);
+    function setTokenURI(uint256 tokenId, string memory _tokenURI)
+        internal
+        virtual
+    {
+        require(
+            _exists(tokenId),
+            "ERC721URIStorage: URI set of nonexistent token"
+        );
+        _tokenURIs[tokenId] = _tokenURI;
+    }
+
+    function mint(uint256 _q) external payable {
+        uint256 tokenId = tokenCounter;
+        // require(
+        //     bytes(tokenURI(tokenId)).length <= 0,
+        //     "tokenURI is already set!"
+        // );
+
+        _safeMint(msg.sender, _q);
+
+        for (uint8 i = 0; i < _q; i++) {
+            tokenCounter = tokenCounter + 1;
+
+            string memory seed = getSeed(tokenId);
+            string memory img = getSvgBase64(seed);
+            // setTokenURI(tokenId, );
+
+            string memory URI = getMetadata(tokenId, img);
+            setTokenURI(tokenId, URI);
+
+            tokenId++;
+        }
     }
 }
