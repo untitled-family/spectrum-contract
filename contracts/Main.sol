@@ -27,16 +27,18 @@ import "./SpectrumLib.sol";
 contract Main is ERC721A {
     uint256 MIN_LAYERS = 5;
     uint256 MAX_LAYERS = 6;
-    uint256 MIN_DURATION = 10;
+    uint256 MIN_DURATION = 5;
     uint256 MAX_DURATION = 30;
-    string TEMP_SEED = "10f0fk";
+    string TEMP_SEED = "10fsdf0adgfgfdsjgfsdjfk";
 
     constructor() ERC721A("Main", "TSTSTS") {}
 
     function createLayer(
         string memory _name,
         string memory _duration,
-        string memory _rgb
+        string memory _rgb,
+        string memory _deg,
+        string memory _invertDeg
     ) internal pure returns (string memory) {
         return
             string.concat(
@@ -62,8 +64,14 @@ contract Main is ERC721A {
                                 svg.prop("attributeType", "xml"),
                                 svg.prop("attributeName", "transform"),
                                 svg.prop("type", "rotate"),
-                                svg.prop("from", "360 500 500"),
-                                svg.prop("to", "0 500 500"),
+                                svg.prop(
+                                    "from",
+                                    string.concat(_deg, " 500 500")
+                                ),
+                                svg.prop(
+                                    "to",
+                                    string.concat("-", _invertDeg, " 500 500")
+                                ),
                                 svg.prop("dur", string.concat(_duration, "s")),
                                 svg.prop("additive", "sum"),
                                 svg.prop("repeatCount", "indefinite")
@@ -131,9 +139,14 @@ contract Main is ERC721A {
                 arr,
                 utils.uint2str(i)
             );
-            string memory deg = utils.uint2str(
-                utils.getRandomInteger(string.concat("deg_", id), seed, 0, 360)
+            uint256 deg = utils.getRandomInteger(
+                string.concat("deg_", id),
+                seed,
+                0,
+                360
             );
+
+            string memory invertDeg = utils.uint2str(360 - deg);
 
             layers = string.concat(
                 layers,
@@ -148,7 +161,9 @@ contract Main is ERC721A {
                         ",",
                         utils.uint2str(shuffledArr[2]),
                         ")"
-                    )
+                    ),
+                    utils.uint2str(deg),
+                    invertDeg
                 )
             );
 
