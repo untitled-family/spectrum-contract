@@ -25,12 +25,12 @@ import "./Base64.sol";
 import "./SpectrumLib.sol";
 
 contract Main is ERC721A {
-    uint256 MIN_LAYERS = 1;
-    uint256 MAX_LAYERS = 3;
-    uint256 MIN_DURATION = 20000;
-    uint256 MAX_DURATION = 40000;
+    uint256 MIN_LAYERS = 5;
+    uint256 MAX_LAYERS = 6;
+    uint256 MIN_DURATION = 10;
+    uint256 MAX_DURATION = 30;
     string TEMP_SEED =
-        "h1232648234sdfdfs123456789fs289374829fghf374dkjfhuhtyysdgdst1234dsf5dsf6789sdf1`1322312fhf";
+        "h1232648234sdfdf1234567s1234sdfgdfjfvhj56789fs0987654321289374829fghf374dkjfhuhtyysdgdst1234dsf5dsf6789sdf1`1322312fhf";
 
     // 13, 17, 19, 23, 29, 31
 
@@ -39,31 +39,63 @@ contract Main is ERC721A {
     function createLayer(
         string memory _name,
         string memory _duration,
-        string memory _gradient
+        string memory _rgb
     ) internal pure returns (string memory) {
         return
             string.concat(
-                svg.foreignObject(
+                svg.g(
                     string.concat(
-                        svg.prop("style", "mix-blend-mode: multiply"),
-                        svg.prop("x", "0"),
-                        svg.prop("y", "0"),
-                        svg.prop("width", "500"),
-                        svg.prop("height", "500")
+                        svg.prop("style", "mix-blend-mode: multiply")
                     ),
-                    svg.div(
-                        string.concat(
-                            svg.prop(
-                                "class",
-                                string.concat(_name, " spectrum")
+                    string.concat(
+                        svg.circle(
+                            string.concat(
+                                svg.prop("cx", "500"),
+                                svg.prop("cy", "500"),
+                                svg.prop("r", "500"),
+                                svg.prop(
+                                    "fill",
+                                    string.concat("url(#", _name, ")")
+                                )
                             ),
-                            svg.prop("xmlns", "http://www.w3.org/1999/xhtml"),
+                            utils.NULL
+                        ),
+                        svg.animateTransform(
+                            string.concat(
+                                svg.prop("attributeType", "xml"),
+                                svg.prop("attributeName", "transform"),
+                                svg.prop("type", "rotate"),
+                                svg.prop("from", "360 500 500"),
+                                svg.prop("to", "0 500 500"),
+                                svg.prop("dur", string.concat(_duration, "s")),
+                                svg.prop("additive", "sum"),
+                                svg.prop("repeatCount", "indefinite")
+                            )
+                        )
+                    )
+                ),
+                svg.defs(
+                    utils.NULL,
+                    svg.radialGradient(
+                        string.concat(
+                            svg.prop("id", _name),
+                            svg.prop("cx", "0"),
+                            svg.prop("cy", "0"),
+                            svg.prop("r", "1"),
+                            svg.prop("gradientUnits", "userSpaceOnUse"),
                             svg.prop(
-                                "style",
-                                spectrum.styles(_gradient, _duration)
+                                "gradientTransform",
+                                "translate(500.001) rotate(90) scale(1000)"
                             )
                         ),
-                        utils.NULL
+                        string.concat(
+                            svg.gradientStop(0, _rgb, utils.NULL),
+                            svg.gradientStop(
+                                100,
+                                _rgb,
+                                string.concat(svg.prop("stop-opacity", "0"))
+                            )
+                        )
                     )
                 )
             );
@@ -176,15 +208,14 @@ contract Main is ERC721A {
                 createLayer(
                     string.concat("layer_", id),
                     utils.uint2str(duration),
-                    spectrum.gradient(
-                        string.concat(deg, "deg"),
-                        string.concat(
-                            utils.uint2str(shuffledArr[0]),
-                            ",",
-                            utils.uint2str(shuffledArr[1]),
-                            ",",
-                            utils.uint2str(shuffledArr[2])
-                        )
+                    string.concat(
+                        "rgb(",
+                        utils.uint2str(shuffledArr[0]),
+                        ",",
+                        utils.uint2str(shuffledArr[1]),
+                        ",",
+                        utils.uint2str(shuffledArr[2]),
+                        ")"
                     )
                 )
             );
@@ -207,10 +238,10 @@ contract Main is ERC721A {
     function getSVG() public view returns (string memory) {
         return
             string.concat(
-                '<svg xmlns="http://www.w3.org/2000/svg" width="500" height="500">',
+                '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000" fill="none">',
                 getLayers(getSeed()),
-                getBaseLayers(getSeed()),
-                spectrum.globalStyles(),
+                // getBaseLayers(getSeed()),
+                // spectrum.globalStyles(),
                 "</svg>"
             );
     }

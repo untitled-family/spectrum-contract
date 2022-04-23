@@ -14,6 +14,14 @@ library svg {
         return el("g", _props, _children);
     }
 
+    function defs(string memory _props, string memory _children)
+        internal
+        pure
+        returns (string memory)
+    {
+        return el("defs", _props, _children);
+    }
+
     function path(string memory _props, string memory _children)
         internal
         pure
