@@ -35,8 +35,6 @@ contract Main is ERC721A {
     mapping(uint256 => uint256) private seeds;
     mapping(address => uint256) private mintedAddress;
 
-    // IMetavatarGenerator public generator;
-
     constructor(SpectrumGeneratorInterface _spectrumGenerator)
         ERC721A("Main", "TSTSTS")
     {
@@ -56,6 +54,7 @@ contract Main is ERC721A {
                     abi.encodePacked(
                         _tokenId,
                         _address,
+                        utils.getRandomInteger("spectrum", _tokenId, 0, 42069),
                         block.difficulty,
                         block.timestamp
                     )

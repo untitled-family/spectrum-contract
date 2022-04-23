@@ -19,5 +19,8 @@ pragma solidity ^0.8.12;
 //_______________________________________________________________________________________________________________________________________
 
 interface SpectrumDetailsInterface {
-    function getDetail(uint256 _detail) external view returns (string memory);
+    function getDetail(uint256 _detail)
+        external
+        view
+        returns (string memory, string memory);
 }

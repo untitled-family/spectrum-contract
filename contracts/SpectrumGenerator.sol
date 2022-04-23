@@ -27,8 +27,8 @@ import "./SpectrumGeneratorInterface.sol";
 import "./SpectrumDetailsInterface.sol";
 
 contract SpectrumGenerator is SpectrumGeneratorInterface {
-    uint256 private MIN_LAYERS = 3;
-    uint256 private MAX_LAYERS = 7;
+    uint256 private MIN_LAYERS = 2;
+    uint256 private MAX_LAYERS = 6;
     uint256 private MIN_DURATION = 10;
     uint256 private MAX_DURATION = 30;
 
@@ -107,7 +107,11 @@ contract SpectrumGenerator is SpectrumGeneratorInterface {
             );
     }
 
-    function getLayers(uint256 seed) private view returns (string memory) {
+    function getLayers(uint256 seed, uint256 d)
+        private
+        view
+        returns (string memory, string memory)
+    {
         uint256 i;
         uint256 iterations = utils.getRandomInteger(
             "iterations",
@@ -116,6 +120,7 @@ contract SpectrumGenerator is SpectrumGeneratorInterface {
             MAX_LAYERS
         );
         string memory layers;
+        string memory layersMeta;
 
         while (i < iterations) {
             string memory id = utils.uint2str(i);
@@ -132,7 +137,7 @@ contract SpectrumGenerator is SpectrumGeneratorInterface {
                 255
             );
             uint256[3] memory arr = [r, 0, 255];
-            uint256[3] memory shuffledArr = utils.shuffle(arr, i);
+            uint256[3] memory shuffledArr = utils.shuffle(arr, i + d);
 
             layers = string.concat(
                 layers,
@@ -151,14 +156,42 @@ contract SpectrumGenerator is SpectrumGeneratorInterface {
                 )
             );
 
+            layersMeta = string.concat(
+                layersMeta,
+                string.concat(
+                    ',{"trait_type": "Layer Color", "value": "',
+                    utils.uint2str(shuffledArr[0]),
+                    ",",
+                    utils.uint2str(shuffledArr[1]),
+                    ",",
+                    utils.uint2str(shuffledArr[2]),
+                    '"}'
+                )
+            );
+
             i++;
         }
 
-        return layers;
+        return (
+            layers,
+            string.concat(
+                ',{"trait_type": "Layers", "value": "',
+                utils.uint2str(iterations),
+                '"}',
+                layersMeta
+            )
+        );
     }
 
-    function _createSvg(uint256 _seed) internal view returns (string memory) {
-        uint256 detail = utils.getRandomInteger("_detail", _seed, 1, 91);
+    function _createSvg(uint256 _seed)
+        internal
+        view
+        returns (string memory, string memory)
+    {
+        uint256 d = utils.getRandomInteger("_detail", _seed, 1, 91);
+        (string memory detail, string memory detailName) = spectrumDetails
+            .getDetail(d);
+        (string memory layers, string memory layersMeta) = getLayers(_seed, d);
 
         string memory stringSvg = string.concat(
             '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 1000 1000">',
@@ -171,25 +204,33 @@ contract SpectrumGenerator is SpectrumGeneratorInterface {
                 ),
                 utils.NULL
             ),
-            getLayers(_seed),
-            spectrumDetails.getDetail(detail),
+            layers,
+            detail,
             "</svg>"
         );
 
-        return
+        return (
             string(
                 abi.encodePacked(
                     "data:image/svg+xml;base64,",
                     Base64.encode(bytes(stringSvg))
                 )
-            );
+            ),
+            string.concat(
+                '"attributes":[{"trait_type": "Detail", "value": "',
+                detailName,
+                '"}',
+                layersMeta,
+                "]"
+            )
+        );
     }
 
-    function _prepareMetadata(uint256 tokenId, string memory image)
-        internal
-        pure
-        returns (string memory)
-    {
+    function _prepareMetadata(
+        uint256 tokenId,
+        string memory image,
+        string memory attributes
+    ) internal pure returns (string memory) {
         return
             string(
                 abi.encodePacked(
@@ -199,7 +240,9 @@ contract SpectrumGenerator is SpectrumGeneratorInterface {
                             abi.encodePacked(
                                 '{"name":"',
                                 utils.uint2str(tokenId),
-                                '", "description":"testest desc", "attributes":"", "image":"',
+                                '", "description":"testest desc", ',
+                                attributes,
+                                ', "image":"',
                                 image,
                                 '"}'
                             )
@@ -214,8 +257,8 @@ contract SpectrumGenerator is SpectrumGeneratorInterface {
         view
         returns (string memory)
     {
-        string memory svg64 = _createSvg(_seed);
+        (string memory svg64, string memory attributes) = _createSvg(_seed);
 
-        return _prepareMetadata(_tokenId, svg64);
+        return _prepareMetadata(_tokenId, svg64, attributes);
     }
 }
