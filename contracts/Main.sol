@@ -29,10 +29,7 @@ contract Main is ERC721A {
     uint256 MAX_LAYERS = 6;
     uint256 MIN_DURATION = 10;
     uint256 MAX_DURATION = 30;
-    string TEMP_SEED =
-        "h1232648234sdfdf1234567s1234sdfgdfjfvhj56789fs0987654321289374829fghf374dkjfhuhtyysdgdst1234dsf5dsf6789sdf1`1322312fhf";
-
-    // 13, 17, 19, 23, 29, 31
+    string TEMP_SEED = "10f0fk";
 
     constructor() ERC721A("Main", "TSTSTS") {}
 
@@ -94,71 +91,6 @@ contract Main is ERC721A {
                                 100,
                                 _rgb,
                                 string.concat(svg.prop("stop-opacity", "0"))
-                            )
-                        )
-                    )
-                )
-            );
-    }
-
-    function getBaseLayers(string memory seed)
-        private
-        view
-        returns (string memory)
-    {
-        uint256 r = utils.getRandomInteger("base", seed, 0, 255);
-        uint256[3] memory arr = [r, 255, 0];
-        uint256[3] memory shuffledArr = utils.shuffle(arr, seed);
-        uint256 duration = utils.getRandomInteger(
-            "base",
-            seed,
-            MIN_DURATION,
-            MAX_DURATION
-        );
-        uint256 oppDuration = utils.getRandomInteger(
-            "base_opposite",
-            seed,
-            MIN_DURATION,
-            MAX_DURATION
-        );
-        string memory deg = utils.uint2str(
-            utils.getRandomInteger("deg", seed, 0, 360)
-        );
-        string memory oppDeg = utils.uint2str(
-            utils.getRandomInteger("oppDeg", seed, 0, 360)
-        );
-        return
-            string.concat(
-                createLayer(
-                    "base",
-                    utils.uint2str(duration),
-                    spectrum.gradient(
-                        string.concat(deg, "deg"),
-                        string.concat(
-                            utils.uint2str(shuffledArr[0]),
-                            ",",
-                            utils.uint2str(shuffledArr[1]),
-                            ",",
-                            utils.uint2str(shuffledArr[2])
-                        )
-                    )
-                ),
-                createLayer(
-                    "base_opposite",
-                    utils.uint2str(oppDuration),
-                    spectrum.gradient(
-                        string.concat(oppDeg, "deg"),
-                        string.concat(
-                            utils.uint2str(
-                                utils.oppositeNumber(shuffledArr[0], 255)
-                            ),
-                            ",",
-                            utils.uint2str(
-                                utils.oppositeNumber(shuffledArr[1], 255)
-                            ),
-                            ",",
-                            utils.uint2str(
-                                utils.oppositeNumber(shuffledArr[2], 255)
                             )
                         )
                     )
