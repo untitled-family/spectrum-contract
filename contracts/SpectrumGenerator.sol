@@ -91,7 +91,7 @@ contract SpectrumGenerator is SpectrumGeneratorInterface {
                             svg.prop("gradientUnits", "userSpaceOnUse"),
                             svg.prop(
                                 "gradientTransform",
-                                "translate(500.001) rotate(90) scale(1000)"
+                                "translate(500) rotate(90) scale(1000)"
                             )
                         ),
                         string.concat(
