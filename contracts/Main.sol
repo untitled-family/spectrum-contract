@@ -36,6 +36,7 @@ contract KineticSpectrum is ERC721A, Ownable {
 
     mapping(uint256 => uint256) private seeds;
     mapping(address => uint256) private mintedAddress;
+    mapping(address => bool) private founders;
 
     SpectrumGeneratorInterface public spectrumGenerator;
 
@@ -76,6 +77,7 @@ contract KineticSpectrum is ERC721A, Ownable {
     }
 
     function mint(uint256 _q) external payable {
+        require(founders[msg.sender], "You are not a founder");
         require(isPublicSale, "Sale has not started");
         require(_q > 0, "You should mint one");
         require(tokenCounter <= MAX_SPECTRUMS, "All metavatars minted");
@@ -102,6 +104,10 @@ contract KineticSpectrum is ERC721A, Ownable {
             tokenCounter++;
             currentTokenId++;
         }
+    }
+
+    function addFounder(address _address) external payable onlyOwner {
+        founders[_address] = true;
     }
 
     function withdraw() external payable onlyOwner {
