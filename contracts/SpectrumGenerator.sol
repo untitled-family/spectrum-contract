@@ -158,14 +158,16 @@ contract SpectrumGenerator is SpectrumGeneratorInterface {
 
             layersMeta = string.concat(
                 layersMeta,
-                string.concat(
-                    ',{"trait_type": "Layer Color", "value": "',
-                    utils.uint2str(shuffledArr[0]),
-                    ",",
-                    utils.uint2str(shuffledArr[1]),
-                    ",",
-                    utils.uint2str(shuffledArr[2]),
-                    '"}'
+                _createAttribute(
+                    "Layer Color",
+                    string.concat(
+                        utils.uint2str(shuffledArr[0]),
+                        ",",
+                        utils.uint2str(shuffledArr[1]),
+                        ",",
+                        utils.uint2str(shuffledArr[2])
+                    ),
+                    true
                 )
             );
 
@@ -175,20 +177,20 @@ contract SpectrumGenerator is SpectrumGeneratorInterface {
         return (
             layers,
             string.concat(
-                ',{"trait_type": "Layers", "value": "',
-                utils.uint2str(iterations),
-                '"}',
+                _createAttribute("Layers", utils.uint2str(iterations), true),
                 layersMeta
             )
         );
     }
 
-    function _createSvg(uint256 _seed)
+    function _createSvg(uint256 _seed, uint256 _tokenId)
         internal
         view
         returns (string memory, string memory)
     {
-        uint256 d = utils.getRandomInteger("_detail", _seed, 1, 91);
+        uint256 d = _tokenId < 2
+            ? 92 + _tokenId
+            : utils.getRandomInteger("_detail", _seed, 1, 92);
         (string memory detail, string memory detailName) = spectrumDetails
             .getDetail(d);
         (string memory layers, string memory layersMeta) = getLayers(_seed, d);
@@ -217,13 +219,28 @@ contract SpectrumGenerator is SpectrumGeneratorInterface {
                 )
             ),
             string.concat(
-                '"attributes":[{"trait_type": "Detail", "value": "',
-                detailName,
-                '"}',
+                '"attributes":[',
+                _createAttribute("Detail", detailName, false),
                 layersMeta,
                 "]"
             )
         );
+    }
+
+    function _createAttribute(
+        string memory _type,
+        string memory _value,
+        bool _leadingComma
+    ) internal pure returns (string memory) {
+        return
+            string.concat(
+                _leadingComma ? "," : "",
+                '{"trait_type":"',
+                _type,
+                '","value":"',
+                _value,
+                '"}'
+            );
     }
 
     function _prepareMetadata(
@@ -257,7 +274,10 @@ contract SpectrumGenerator is SpectrumGeneratorInterface {
         view
         returns (string memory)
     {
-        (string memory svg64, string memory attributes) = _createSvg(_seed);
+        (string memory svg64, string memory attributes) = _createSvg(
+            _seed,
+            _tokenId
+        );
 
         return _prepareMetadata(_tokenId, svg64, attributes);
     }
