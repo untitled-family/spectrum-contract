@@ -18,25 +18,29 @@ pragma solidity ^0.8.12;
 //_______________________________________________________________________________________________________________________________________
 //_______________________________________________________________________________________________________________________________________
 
+import "@openzeppelin/contracts/access/Ownable.sol";
 import "erc721a/contracts/ERC721A.sol";
 import "./Utils.sol";
 import "./SpectrumLib.sol";
 import "./SpectrumGeneratorInterface.sol";
 
-contract Main is ERC721A {
+contract KineticSpectrum is ERC721A, Ownable {
     uint256 public constant MAX_SPECTRUMS = 1111;
-    uint256 public constant MAX_PER_ADDRESS = 1111;
-    uint256 public constant MAX_PER_ADDRESS_WL = 5;
-    uint256 public constant PRICE = 0.025 ether;
-    uint256 public tokenCounter;
+    uint256 public constant MAX_PER_ADDRESS = 30;
+    uint256 public constant PRICE = 0.003 ether;
+    uint256 public constant FRIENDS_PRICE = 0.002 ether;
+    uint256 public tokenCounter = 1;
 
-    SpectrumGeneratorInterface public spectrumGenerator;
+    bool public isFriendSale = false;
+    bool public isPublicSale = false;
 
     mapping(uint256 => uint256) private seeds;
     mapping(address => uint256) private mintedAddress;
 
+    SpectrumGeneratorInterface public spectrumGenerator;
+
     constructor(SpectrumGeneratorInterface _spectrumGenerator)
-        ERC721A("Main", "TSTSTS")
+        ERC721A("Kinetic Spectrum", "KS")
     {
         spectrumGenerator = _spectrumGenerator;
     }
@@ -71,22 +75,20 @@ contract Main is ERC721A {
         return spectrumGenerator.tokenURI(_tokenId, seeds[_tokenId]);
     }
 
-    /**
-     * TODO: make sure it's nonReentrant
-     */
     function mint(uint256 _q) external payable {
-        // require(_q > 0, "You should mint one");
-        // require(tokenCounter <= MAX_SPECTRUMS, "All metavatars minted");
-        // require(
-        //     tokenCounter + _q <= MAX_SPECTRUMS,
-        //     "Minting exceeds max supply"
-        // );
-        // require(
-        //     mintedAddress[msg.sender] + _q <= MAX_PER_ADDRESS,
-        //     "Max 30 per wallet"
-        // );
-        // require(_q <= MAX_PER_ADDRESS, "Max 30 per wallet");
-        // require(PRICE * _q <= msg.value, "Min 0.25eth per Spectrum");
+        require(isPublicSale, "Sale has not started");
+        require(_q > 0, "You should mint one");
+        require(tokenCounter <= MAX_SPECTRUMS, "All metavatars minted");
+        require(
+            tokenCounter + _q <= MAX_SPECTRUMS,
+            "Minting exceeds max supply"
+        );
+        require(_q <= MAX_PER_ADDRESS, "Max 30 per wallet");
+        require(
+            mintedAddress[msg.sender] + _q <= MAX_PER_ADDRESS,
+            "Minting exceeds max 30 per wallet"
+        );
+        require(PRICE * _q <= msg.value, "Min 0.3eth per Spectrum");
         uint256 currentTokenId = tokenCounter;
 
         _safeMint(msg.sender, _q);
@@ -100,5 +102,25 @@ contract Main is ERC721A {
             tokenCounter++;
             currentTokenId++;
         }
+    }
+
+    function withdraw() external payable onlyOwner {
+        payable(owner()).transfer(address(this).balance);
+    }
+
+    function startFriendSale() public onlyOwner {
+        isFriendSale = true;
+    }
+
+    function stopFriendSale() public onlyOwner {
+        isFriendSale = false;
+    }
+
+    function startPublicSale() public onlyOwner {
+        isPublicSale = true;
+    }
+
+    function stopPublicSale() public onlyOwner {
+        isPublicSale = false;
     }
 }
