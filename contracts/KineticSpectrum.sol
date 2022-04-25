@@ -1,7 +1,9 @@
-//SPDX-License-Identifier: MIT
+//SPDX-License-Identifier: CC0
 pragma solidity ^0.8.12;
 
-// Name: Spectrum Minter
+// Name: Kinetic Spectrum Minter
+// Description: Contract that mints tokens and store seeds
+// Twitter: @KineticSpectrum
 // Design: biron.eth
 // Buidl: himlate.eth
 //_______________________________________________________________________________________________________________________________________

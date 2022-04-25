@@ -1,7 +1,9 @@
-//SPDX-License-Identifier: MIT
+//SPDX-License-Identifier: CC0
 pragma solidity ^0.8.12;
 
-// Name: Spectrum Generator
+// Name: Kinetic Spectrum Generator
+// Description: Contract that generate each Kinetic Spectrum based on a seed
+// Twitter: @KineticSpectrum
 // Design: biron.eth
 // Buidl: himlate.eth
 //_______________________________________________________________________________________________________________________________________
