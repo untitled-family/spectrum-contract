@@ -119,6 +119,7 @@ contract KineticSpectrum is ERC721A, Ownable, ReentrancyGuard {
             _currentIndex + _q <= MAX_SPECTRUMS,
             "Minting exceeds max supply"
         );
+        require(FRIENDS_PRICE * _q <= msg.value, "Min 0.03eth per Spectrum");
 
         uint256 currentTokenId = _currentIndex;
 

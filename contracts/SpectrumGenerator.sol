@@ -257,7 +257,7 @@ contract SpectrumGenerator is SpectrumGeneratorInterface {
                             abi.encodePacked(
                                 '{"name":"',
                                 utils.uint2str(tokenId),
-                                '", "description":"testest desc", ',
+                                '", "description":"Kinetic Spectrums is a collection of dynamic, ever changing artworks stored on the Ethereum Network. Each Spectrum is made by combining 2 to 5 layers of color. These layers multiply with each other and slowly rotate at a different speeds meaning your NFT is constantly changing color and evolving the longer you watch it.", ',
                                 attributes,
                                 ', "image":"',
                                 image,
