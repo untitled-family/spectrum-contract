@@ -168,7 +168,8 @@ contract SpectrumGenerator is SpectrumGeneratorInterface {
                         utils.uint2str(shuffledArr[2])
                     ),
                     true
-                )
+                ),
+                _createAttribute("Speed", utils.uint2str(duration), true)
             );
 
             i++;

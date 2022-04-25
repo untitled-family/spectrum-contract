@@ -6,33 +6,6 @@ library utils {
     // used to simulate empty strings
     string internal constant NULL = "";
 
-    // formats a CSS variable line. includes a semicolon for formatting.
-    function setCssVar(string memory _key, string memory _val)
-        internal
-        pure
-        returns (string memory)
-    {
-        return string.concat("--", _key, ":", _val, ";");
-    }
-
-    // formats getting a css variable
-    function getCssVar(string memory _key)
-        internal
-        pure
-        returns (string memory)
-    {
-        return string.concat("var(--", _key, ")");
-    }
-
-    // formats getting a def URL
-    function getDefURL(string memory _id)
-        internal
-        pure
-        returns (string memory)
-    {
-        return string.concat("url(#", _id, ")");
-    }
-
     function rgbaString(string memory _rgb, string memory _a)
         internal
         pure
@@ -86,28 +59,6 @@ library utils {
     {
         return
             keccak256(abi.encodePacked(_a)) == keccak256(abi.encodePacked(_b));
-    }
-
-    // returns the length of a string in characters
-    function utfStringLength(string memory _str)
-        internal
-        pure
-        returns (uint256 length)
-    {
-        uint256 i = 0;
-        bytes memory string_rep = bytes(_str);
-
-        while (i < string_rep.length) {
-            if (string_rep[i] >> 7 == 0) i += 1;
-            else if (string_rep[i] >> 5 == bytes1(uint8(0x6))) i += 2;
-            else if (string_rep[i] >> 4 == bytes1(uint8(0xE))) i += 3;
-            else if (string_rep[i] >> 3 == bytes1(uint8(0x1E)))
-                i += 4;
-                //For safety
-            else i += 1;
-
-            length++;
-        }
     }
 
     // converts an unsigned integer to a string
@@ -166,13 +117,5 @@ library utils {
         }
 
         return _arr;
-    }
-
-    function oppositeNumber(uint256 _a, uint256 _max)
-        internal
-        pure
-        returns (uint256)
-    {
-        return _max - _a;
     }
 }

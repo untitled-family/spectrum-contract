@@ -23,7 +23,6 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
 import "erc721a/contracts/ERC721A.sol";
 import "./Utils.sol";
-import "./SpectrumLib.sol";
 import "./SpectrumGeneratorInterface.sol";
 
 contract KineticSpectrum is ERC721A, Ownable, ReentrancyGuard {

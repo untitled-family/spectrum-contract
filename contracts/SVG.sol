@@ -22,68 +22,12 @@ library svg {
         return el("defs", _props, _children);
     }
 
-    function path(string memory _props, string memory _children)
-        internal
-        pure
-        returns (string memory)
-    {
-        return el("path", _props, _children);
-    }
-
-    function text(string memory _props, string memory _children)
-        internal
-        pure
-        returns (string memory)
-    {
-        return el("text", _props, _children);
-    }
-
-    function line(string memory _props, string memory _children)
-        internal
-        pure
-        returns (string memory)
-    {
-        return el("line", _props, _children);
-    }
-
     function circle(string memory _props, string memory _children)
         internal
         pure
         returns (string memory)
     {
         return el("circle", _props, _children);
-    }
-
-    function rect(string memory _props, string memory _children)
-        internal
-        pure
-        returns (string memory)
-    {
-        return el("rect", _props, _children);
-    }
-
-    function filter(string memory _props, string memory _children)
-        internal
-        pure
-        returns (string memory)
-    {
-        return el("filter", _props, _children);
-    }
-
-    function cdata(string memory _content)
-        internal
-        pure
-        returns (string memory)
-    {
-        return string.concat("<![CDATA[", _content, "]]>");
-    }
-
-    function div(string memory _props, string memory _children)
-        internal
-        pure
-        returns (string memory)
-    {
-        return svg.el("div", _props, _children);
     }
 
     /* GRADIENTS */
@@ -93,14 +37,6 @@ library svg {
         returns (string memory)
     {
         return el("radialGradient", _props, _children);
-    }
-
-    function linearGradient(string memory _props, string memory _children)
-        internal
-        pure
-        returns (string memory)
-    {
-        return el("linearGradient", _props, _children);
     }
 
     function gradientStop(
@@ -128,27 +64,6 @@ library svg {
         returns (string memory)
     {
         return el("animateTransform", _props, utils.NULL);
-    }
-
-    function image(string memory _href, string memory _props)
-        internal
-        pure
-        returns (string memory)
-    {
-        return
-            el(
-                "image",
-                string.concat(prop("href", _href), " ", _props),
-                utils.NULL
-            );
-    }
-
-    function foreignObject(string memory _props, string memory _children)
-        internal
-        pure
-        returns (string memory)
-    {
-        return el("foreignObject", _props, _children);
     }
 
     /* COMMON */
