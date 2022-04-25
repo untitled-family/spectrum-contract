@@ -18,11 +18,9 @@ pragma solidity ^0.8.12;
 //_______________________________________________________________________________________________________________________________________
 //_______________________________________________________________________________________________________________________________________
 
-import "erc721a/contracts/ERC721A.sol";
 import "./SVG.sol";
 import "./Utils.sol";
 import "./Base64.sol";
-import "./SpectrumLib.sol";
 import "./SpectrumGeneratorInterface.sol";
 import "./SpectrumDetailsInterface.sol";
 
@@ -107,7 +105,7 @@ contract SpectrumGenerator is SpectrumGeneratorInterface {
             );
     }
 
-    function getLayers(uint256 seed, uint256 d)
+    function _getLayers(uint256 seed, uint256 d)
         private
         view
         returns (string memory, string memory)
@@ -194,7 +192,7 @@ contract SpectrumGenerator is SpectrumGeneratorInterface {
             : utils.getRandomInteger("_detail", _seed, 1, 92);
         (string memory detail, string memory detailName) = spectrumDetails
             .getDetail(d);
-        (string memory layers, string memory layersMeta) = getLayers(_seed, d);
+        (string memory layers, string memory layersMeta) = _getLayers(_seed, d);
 
         string memory stringSvg = string.concat(
             '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 1000 1000">',
@@ -256,7 +254,7 @@ contract SpectrumGenerator is SpectrumGeneratorInterface {
                     Base64.encode(
                         bytes(
                             abi.encodePacked(
-                                '{"name":"',
+                                '{"name":"Spectrum #',
                                 utils.uint2str(tokenId),
                                 '", "description":"Kinetic Spectrums is a collection of dynamic, ever changing artworks stored on the Ethereum Network. Each Spectrum is made by combining 2 to 5 layers of color. These layers multiply with each other and slowly rotate at a different speeds meaning your NFT is constantly changing color and evolving the longer you watch it.", ',
                                 attributes,
