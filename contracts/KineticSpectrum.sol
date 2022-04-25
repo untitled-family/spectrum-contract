@@ -190,4 +190,11 @@ contract KineticSpectrum is ERC721A, Ownable, ReentrancyGuard {
     function setRoot(bytes32 _root) external onlyOwner {
         root = _root;
     }
+
+    function setRoot(SpectrumGeneratorInterface _spectrumGenerator)
+        external
+        onlyOwner
+    {
+        spectrumGenerator = _spectrumGenerator;
+    }
 }
