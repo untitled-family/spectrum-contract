@@ -18,30 +18,32 @@ pragma solidity ^0.8.12;
 //_______________________________________________________________________________________________________________________________________
 //_______________________________________________________________________________________________________________________________________
 
+import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
 import "erc721a/contracts/ERC721A.sol";
 import "./Utils.sol";
 import "./SpectrumLib.sol";
 import "./SpectrumGeneratorInterface.sol";
-import "hardhat/console.sol";
 
-// import "./SpectrumGenerator.sol";
-
-contract Main is ERC721A {
+contract KineticSpectrum is ERC721A, Ownable, ReentrancyGuard {
     uint256 public constant MAX_SPECTRUMS = 1111;
-    uint256 public constant MAX_PER_ADDRESS = 30;
-    uint256 public constant MAX_PER_ADDRESS_WL = 5;
-    uint256 public constant PRICE = 0.025 ether;
-    uint256 public tokenCounter;
+    uint256 public constant PRICE = 0.003 ether;
+    uint256 public constant FRIENDS_PRICE = 0.002 ether;
+
+    bool public isFriendSale = false;
+    bool public isPublicSale = false;
+
+    bytes32 private root;
+
+    mapping(uint256 => uint256) public seeds;
+    mapping(address => uint256) public mintedAddress;
+    mapping(address => bool) private founders;
 
     SpectrumGeneratorInterface public spectrumGenerator;
 
-    mapping(uint256 => uint256) private seeds;
-    mapping(address => uint256) private mintedAddress;
-
-    // IMetavatarGenerator public generator;
-
     constructor(SpectrumGeneratorInterface _spectrumGenerator)
-        ERC721A("Main", "TSTSTS")
+        ERC721A("Kinetic Spectrum", "KS")
     {
         spectrumGenerator = _spectrumGenerator;
     }
@@ -59,6 +61,7 @@ contract Main is ERC721A {
                     abi.encodePacked(
                         _tokenId,
                         _address,
+                        utils.getRandomInteger("spectrum", _tokenId, 0, 42069),
                         block.difficulty,
                         block.timestamp
                     )
@@ -72,28 +75,20 @@ contract Main is ERC721A {
         override
         returns (string memory)
     {
-        console.log("_tokenId", _tokenId);
-        console.log("seeds[_tokenId]", seeds[_tokenId]);
+        require(_tokenId < _totalMinted(), "TokenId not yet minted");
         return spectrumGenerator.tokenURI(_tokenId, seeds[_tokenId]);
     }
 
-    /**
-     * TODO: make sure it's nonReentrant
-     */
-    function mint(uint256 _q) external payable {
+    function mint(uint256 _q) external payable nonReentrant {
+        require(isPublicSale, "Sale has not started");
         require(_q > 0, "You should mint one");
-        require(tokenCounter <= MAX_SPECTRUMS, "All metavatars minted");
+        require(_currentIndex <= MAX_SPECTRUMS, "All metavatars minted");
         require(
-            tokenCounter + _q <= MAX_SPECTRUMS,
+            _currentIndex + _q <= MAX_SPECTRUMS,
             "Minting exceeds max supply"
         );
-        require(
-            mintedAddress[msg.sender] + _q <= MAX_PER_ADDRESS,
-            "Max 30 per wallet"
-        );
-        require(_q <= MAX_PER_ADDRESS, "Max 30 per wallet");
-        require(PRICE * _q <= msg.value, "Min 0.25eth per Spectrum");
-        uint256 currentTokenId = tokenCounter;
+        require(PRICE * _q <= msg.value, "Min 0.03eth per Spectrum");
+        uint256 currentTokenId = _currentIndex;
 
         _safeMint(msg.sender, _q);
 
@@ -103,8 +98,95 @@ contract Main is ERC721A {
 
             emit onMintSuccess(msg.sender, currentTokenId);
 
-            tokenCounter++;
             currentTokenId++;
         }
+    }
+
+    function friendMint(uint256 _q, bytes32[] calldata _merkleProof)
+        external
+        payable
+        nonReentrant
+    {
+        bytes32 leaf = keccak256(abi.encodePacked(msg.sender));
+        require(isFriendSale, "Sale has not started or has finished");
+        require(_q > 0, "You should mint one");
+        require(
+            MerkleProof.verify(_merkleProof, root, leaf),
+            "Incorrect proof"
+        );
+        require(_currentIndex <= MAX_SPECTRUMS, "All metavatars minted");
+        require(
+            _currentIndex + _q <= MAX_SPECTRUMS,
+            "Minting exceeds max supply"
+        );
+        require(FRIENDS_PRICE * _q <= msg.value, "Min 0.03eth per Spectrum");
+
+        uint256 currentTokenId = _currentIndex;
+
+        _safeMint(msg.sender, _q);
+
+        for (uint8 i = 0; i < _q; i++) {
+            seeds[currentTokenId] = _createSeed(currentTokenId, msg.sender);
+            mintedAddress[msg.sender] += _q;
+
+            emit onMintSuccess(msg.sender, currentTokenId);
+
+            currentTokenId++;
+        }
+    }
+
+    function foundersMint(uint256 _q) external payable nonReentrant {
+        require(founders[msg.sender], "You are not a founder");
+        require(_currentIndex <= MAX_SPECTRUMS, "All metavatars minted");
+        require(
+            _currentIndex + _q <= MAX_SPECTRUMS,
+            "Minting exceeds max supply"
+        );
+        uint256 currentTokenId = _currentIndex;
+
+        _safeMint(msg.sender, _q);
+
+        for (uint8 i = 0; i < _q; i++) {
+            seeds[currentTokenId] = _createSeed(currentTokenId, msg.sender);
+            mintedAddress[msg.sender] += _q;
+
+            emit onMintSuccess(msg.sender, currentTokenId);
+
+            currentTokenId++;
+        }
+    }
+
+    function airdrop(address _address) external onlyOwner {
+        seeds[_currentIndex] = _createSeed(_currentIndex, msg.sender);
+        mintedAddress[_address] += 1;
+        _safeMint(_address, 1);
+    }
+
+    function addFounder(address _address) external onlyOwner {
+        founders[_address] = true;
+    }
+
+    function withdraw() external payable onlyOwner {
+        payable(owner()).transfer(address(this).balance);
+    }
+
+    function startFriendSale() external onlyOwner {
+        isFriendSale = true;
+    }
+
+    function stopFriendSale() external onlyOwner {
+        isFriendSale = false;
+    }
+
+    function startPublicSale() external onlyOwner {
+        isPublicSale = true;
+    }
+
+    function stopPublicSale() external onlyOwner {
+        isPublicSale = false;
+    }
+
+    function setRoot(bytes32 _root) external onlyOwner {
+        root = _root;
     }
 }

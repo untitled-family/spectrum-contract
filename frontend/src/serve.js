@@ -43,7 +43,7 @@ const webpage = ({ stringSVG, base64SVG }) => `
   <hr />
   <div>base64:</div>
   <div style="position: relative">
-    <img src="${base64SVG}" role="presentation" />
+    <img width='400px' height='400' src="${base64SVG}" role="presentation" />
   </div>
   <script>
     const sse = new EventSource('/changes');
