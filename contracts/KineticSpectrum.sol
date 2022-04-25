@@ -44,7 +44,7 @@ contract KineticSpectrum is ERC721A, Ownable, ReentrancyGuard {
     SpectrumGeneratorInterface public spectrumGenerator;
 
     constructor(SpectrumGeneratorInterface _spectrumGenerator)
-        ERC721A("Kinetic Spectrum", "KS")
+        ERC721A("Kinetic Spectrum", "SPCTR")
     {
         spectrumGenerator = _spectrumGenerator;
     }
