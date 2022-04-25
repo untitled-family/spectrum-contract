@@ -20,10 +20,10 @@ pragma solidity ^0.8.12;
 //_______________________________________________________________________________________________________________________________________
 //_______________________________________________________________________________________________________________________________________
 
-import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
-import "@openzeppelin/contracts/access/Ownable.sol";
-import "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
-import "erc721a/contracts/ERC721A.sol";
+import "./ERC721A.sol";
+import "./ReentrancyGuard.sol";
+import "./Ownable.sol";
+import "./MerkleProof.sol";
 import "./Utils.sol";
 import "./SpectrumGeneratorInterface.sol";
 
