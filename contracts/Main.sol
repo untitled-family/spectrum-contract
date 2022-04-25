@@ -18,19 +18,23 @@ pragma solidity ^0.8.12;
 //_______________________________________________________________________________________________________________________________________
 //_______________________________________________________________________________________________________________________________________
 
+import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
 import "erc721a/contracts/ERC721A.sol";
 import "./Utils.sol";
 import "./SpectrumLib.sol";
 import "./SpectrumGeneratorInterface.sol";
 
-contract KineticSpectrum is ERC721A, Ownable {
+contract KineticSpectrum is ERC721A, Ownable, ReentrancyGuard {
     uint256 public constant MAX_SPECTRUMS = 1111;
     uint256 public constant PRICE = 0.003 ether;
     uint256 public constant FRIENDS_PRICE = 0.002 ether;
 
     bool public isFriendSale = false;
     bool public isPublicSale = false;
+
+    bytes32 private root;
 
     mapping(uint256 => uint256) public seeds;
     mapping(address => uint256) public mintedAddress;
@@ -75,7 +79,7 @@ contract KineticSpectrum is ERC721A, Ownable {
         return spectrumGenerator.tokenURI(_tokenId, seeds[_tokenId]);
     }
 
-    function mint(uint256 _q) external payable {
+    function mint(uint256 _q) external payable nonReentrant {
         require(isPublicSale, "Sale has not started");
         require(_q > 0, "You should mint one");
         require(_currentIndex <= MAX_SPECTRUMS, "All metavatars minted");
@@ -83,7 +87,7 @@ contract KineticSpectrum is ERC721A, Ownable {
             _currentIndex + _q <= MAX_SPECTRUMS,
             "Minting exceeds max supply"
         );
-        require(PRICE * _q <= msg.value, "Min 0.3eth per Spectrum");
+        require(PRICE * _q <= msg.value, "Min 0.03eth per Spectrum");
         uint256 currentTokenId = _currentIndex;
 
         _safeMint(msg.sender, _q);
@@ -98,7 +102,39 @@ contract KineticSpectrum is ERC721A, Ownable {
         }
     }
 
-    function foundersMint(uint256 _q) external payable {
+    function friendMint(uint256 _q, bytes32[] calldata _merkleProof)
+        external
+        payable
+        nonReentrant
+    {
+        bytes32 leaf = keccak256(abi.encodePacked(msg.sender));
+        require(isFriendSale, "Sale has not started or has finished");
+        require(_q > 0, "You should mint one");
+        require(
+            MerkleProof.verify(_merkleProof, root, leaf),
+            "Incorrect proof"
+        );
+        require(_currentIndex <= MAX_SPECTRUMS, "All metavatars minted");
+        require(
+            _currentIndex + _q <= MAX_SPECTRUMS,
+            "Minting exceeds max supply"
+        );
+
+        uint256 currentTokenId = _currentIndex;
+
+        _safeMint(msg.sender, _q);
+
+        for (uint8 i = 0; i < _q; i++) {
+            seeds[currentTokenId] = _createSeed(currentTokenId, msg.sender);
+            mintedAddress[msg.sender] += _q;
+
+            emit onMintSuccess(msg.sender, currentTokenId);
+
+            currentTokenId++;
+        }
+    }
+
+    function foundersMint(uint256 _q) external payable nonReentrant {
         require(founders[msg.sender], "You are not a founder");
         require(_currentIndex <= MAX_SPECTRUMS, "All metavatars minted");
         require(
@@ -147,5 +183,9 @@ contract KineticSpectrum is ERC721A, Ownable {
 
     function stopPublicSale() external onlyOwner {
         isPublicSale = false;
+    }
+
+    function setRoot(bytes32 _root) external onlyOwner {
+        root = _root;
     }
 }
