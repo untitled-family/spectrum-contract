@@ -39,7 +39,7 @@ contract KineticSpectrum is ERC721A, Ownable, ReentrancyGuard {
 
     mapping(uint256 => uint256) public seeds;
     mapping(address => uint256) public mintedAddress;
-    mapping(address => bool) private founders;
+    mapping(address => bool) public founders;
 
     SpectrumGeneratorInterface public spectrumGenerator;
 
