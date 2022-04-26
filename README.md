@@ -1,5 +1,7 @@
 # Kinetic Spectrum - contract
 
+Mint at [kineticspectru.ms/](https://kineticspectru.ms/)
+
 Bootstrapped with [Hardhat Hackathon Boilerplate](https://github.com/nomiclabs/hardhat-hackathon-boilerplate)
 
 Also using the amazing [Hot Chain SVG](https://github.com/w1nt3r-eth/hot-chain-svg) library to speed up development process.
