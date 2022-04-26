@@ -169,7 +169,7 @@ contract SpectrumGenerator is SpectrumGeneratorInterface {
                     ),
                     true
                 ),
-                _createAttribute("Speed", utils.uint2str(duration), true)
+                _createAttribute("Layer Speed", utils.uint2str(duration), true)
             );
 
             i++;

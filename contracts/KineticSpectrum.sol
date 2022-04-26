@@ -29,8 +29,9 @@ import "./SpectrumGeneratorInterface.sol";
 
 contract KineticSpectrum is ERC721A, Ownable, ReentrancyGuard {
     uint256 public constant MAX_SPECTRUMS = 1111;
-    uint256 public constant PRICE = 0.003 ether;
-    uint256 public constant FRIENDS_PRICE = 0.002 ether;
+    uint256 public constant MAX_FOUNDER = 20;
+    uint256 public constant PRICE = 0.03 ether;
+    uint256 public constant FRIENDS_PRICE = 0.02 ether;
 
     bool public isFriendSale = false;
     bool public isPublicSale = false;
@@ -48,8 +49,6 @@ contract KineticSpectrum is ERC721A, Ownable, ReentrancyGuard {
     {
         spectrumGenerator = _spectrumGenerator;
     }
-
-    event onMintSuccess(address sender, uint256 tokenId);
 
     function _createSeed(uint256 _tokenId, address _address)
         internal
@@ -97,8 +96,6 @@ contract KineticSpectrum is ERC721A, Ownable, ReentrancyGuard {
             seeds[currentTokenId] = _createSeed(currentTokenId, msg.sender);
             mintedAddress[msg.sender] += _q;
 
-            emit onMintSuccess(msg.sender, currentTokenId);
-
             currentTokenId++;
         }
     }
@@ -108,19 +105,19 @@ contract KineticSpectrum is ERC721A, Ownable, ReentrancyGuard {
         payable
         nonReentrant
     {
-        bytes32 leaf = keccak256(abi.encodePacked(msg.sender));
         require(isFriendSale, "Sale has not started or has finished");
         require(_q > 0, "You should mint one");
+        bytes32 leaf = keccak256(abi.encodePacked(msg.sender));
         require(
             MerkleProof.verify(_merkleProof, root, leaf),
-            "Incorrect proof"
+            "This address is not in friendlist"
         );
         require(_currentIndex <= MAX_SPECTRUMS, "All metavatars minted");
         require(
             _currentIndex + _q <= MAX_SPECTRUMS,
             "Minting exceeds max supply"
         );
-        require(FRIENDS_PRICE * _q <= msg.value, "Min 0.03eth per Spectrum");
+        require(FRIENDS_PRICE * _q <= msg.value, "Min 0.02eth per Spectrum");
 
         uint256 currentTokenId = _currentIndex;
 
@@ -129,8 +126,6 @@ contract KineticSpectrum is ERC721A, Ownable, ReentrancyGuard {
         for (uint8 i = 0; i < _q; i++) {
             seeds[currentTokenId] = _createSeed(currentTokenId, msg.sender);
             mintedAddress[msg.sender] += _q;
-
-            emit onMintSuccess(msg.sender, currentTokenId);
 
             currentTokenId++;
         }
@@ -143,6 +138,7 @@ contract KineticSpectrum is ERC721A, Ownable, ReentrancyGuard {
             _currentIndex + _q <= MAX_SPECTRUMS,
             "Minting exceeds max supply"
         );
+        require(mintedAddress[msg.sender] + _q <= MAX_FOUNDER, "Max reached");
         uint256 currentTokenId = _currentIndex;
 
         _safeMint(msg.sender, _q);
@@ -151,13 +147,16 @@ contract KineticSpectrum is ERC721A, Ownable, ReentrancyGuard {
             seeds[currentTokenId] = _createSeed(currentTokenId, msg.sender);
             mintedAddress[msg.sender] += _q;
 
-            emit onMintSuccess(msg.sender, currentTokenId);
-
             currentTokenId++;
         }
     }
 
     function airdrop(address _address) external onlyOwner {
+        require(_currentIndex <= MAX_SPECTRUMS, "All metavatars minted");
+        require(
+            _currentIndex + 1 <= MAX_SPECTRUMS,
+            "Minting exceeds max supply"
+        );
         seeds[_currentIndex] = _createSeed(_currentIndex, msg.sender);
         mintedAddress[_address] += 1;
         _safeMint(_address, 1);
@@ -191,7 +190,7 @@ contract KineticSpectrum is ERC721A, Ownable, ReentrancyGuard {
         root = _root;
     }
 
-    function setRoot(SpectrumGeneratorInterface _spectrumGenerator)
+    function setGenerator(SpectrumGeneratorInterface _spectrumGenerator)
         external
         onlyOwner
     {
