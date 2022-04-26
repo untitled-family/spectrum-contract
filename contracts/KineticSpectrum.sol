@@ -91,10 +91,10 @@ contract KineticSpectrum is ERC721A, Ownable, ReentrancyGuard {
         uint256 currentTokenId = _currentIndex;
 
         _safeMint(msg.sender, _q);
+        mintedAddress[msg.sender] += _q;
 
         for (uint8 i = 0; i < _q; i++) {
             seeds[currentTokenId] = _createSeed(currentTokenId, msg.sender);
-            mintedAddress[msg.sender] += _q;
 
             currentTokenId++;
         }
@@ -122,10 +122,10 @@ contract KineticSpectrum is ERC721A, Ownable, ReentrancyGuard {
         uint256 currentTokenId = _currentIndex;
 
         _safeMint(msg.sender, _q);
+        mintedAddress[msg.sender] += _q;
 
         for (uint8 i = 0; i < _q; i++) {
             seeds[currentTokenId] = _createSeed(currentTokenId, msg.sender);
-            mintedAddress[msg.sender] += _q;
 
             currentTokenId++;
         }
@@ -142,10 +142,10 @@ contract KineticSpectrum is ERC721A, Ownable, ReentrancyGuard {
         uint256 currentTokenId = _currentIndex;
 
         _safeMint(msg.sender, _q);
+        mintedAddress[msg.sender] += _q;
 
         for (uint8 i = 0; i < _q; i++) {
             seeds[currentTokenId] = _createSeed(currentTokenId, msg.sender);
-            mintedAddress[msg.sender] += _q;
 
             currentTokenId++;
         }
